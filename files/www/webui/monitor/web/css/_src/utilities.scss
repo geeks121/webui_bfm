@@ -1,0 +1,111 @@
+@charset "UTF-8";
+@import "compass";
+@import "_config.libs";
+
+
+/* -------------------- */
+/*  ==     Fonts        */
+/* -------------------- */
+@include font-face('OpenSans-Light', font-files('OpenSans-Light.ttf', 'OpenSans-Light.svg', 'OpenSans-Light.woff'), 'OpenSans-Light.eot');
+@include font-face('Entypo', font-files('entypo.ttf', 'entypo.eot', 'entypo.svg', 'entypo.woff'));
+
+@import "../libs/_icons.entypo";
+
+/* ------------------- */
+/*  ==     Misc        */
+/* ------------------- */
+* { padding: 0; margin: 0; }
+*:focus { outline: none; }
+
+*, *:before, *:after {
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+}
+
+.cls:after {
+    content: ".";
+    display: block;
+    height: 0;
+    clear: both;
+    visibility: hidden;
+}
+
+img { border: 0; }
+
+.debug { border: 1px solid red; }
+
+.text_left, .t-left { text-align: left !important; }
+.text_right, .t-right { text-align: right !important; }
+.text_center, .t-center { text-align: center !important; }
+
+.pfixed { position: fixed !important; }
+.f-left { float: left; }
+.f-right { float: right; }
+
+.column-left {
+    float: left;
+    width: 49%;
+}
+.column-right {
+    float: right;
+    width: 49%;
+}
+.column-33 {
+    width: 32%;
+}
+.column-66 {
+    width: 66%;
+}
+
+
+/*pre {
+    background-color: #fafafa;
+    border: 1px solid #ccc;
+    padding: 5px;
+    color: #666;
+}*/
+
+.w10p  { width: 10%; }
+.w15p  { width: 15%; }
+.w20p  { width: 20%; }
+.w33p  { width: 33%; }
+.w35p  { width: 35%; }
+.w50p  { width: 50%; }
+.w100p { width: 100%; }
+
+
+/* ------------------------ */
+/*  ==     Scrollbar        */
+/* ------------------------ */
+::-webkit-scrollbar-track {
+    box-shadow: inset 1px 0px 3px rgba(0,0,0,0.2);
+    background-color: #F5F5F5;
+}
+::-webkit-scrollbar-track:hover {
+    background-color: #EFEFEF;
+}
+::-webkit-scrollbar {
+    width: 8px;
+    background-color: #F5F5F5;
+}
+::-webkit-scrollbar-thumb {
+    background-color: #959595;
+}
+::-webkit-scrollbar-thumb:hover {
+    background-color: #6B6B6B;
+}
+::-webkit-scrollbar-thumb:active {
+    background-color: #555;
+}
+
+
+/* --------------------- */
+/*  ==     Labels        */
+/* --------------------- */
+@import "../libs/_labels";
+
+/* -------------------------- */
+/*  ==     Classic box        */
+/* -------------------------- */
+@import "../libs/_classic-box";

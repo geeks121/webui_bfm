@@ -1,0 +1,25 @@
+{
+    "esm": {
+        "version": "2.5",
+        "website": "http://www.ezservermonitor.com",
+        "check_updates": true,
+        "auto_refresh": 0,
+        "theme": "blue",
+        "custom_title": "BFM"
+    },
+    "cpu": {
+        "enable_temperature": true
+    },
+    "disk": {
+        "show_tmpfs": false,
+        "show_overlay": false,
+        "show_apex": false,
+        "show_filesystem": true
+    },
+    "ping": {
+        "hosts": [
+            "gstatic.com",
+            "cp.cloudflare.com"
+        ]
+    }
+}

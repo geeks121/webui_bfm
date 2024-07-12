@@ -1,0 +1,21 @@
+#!/system/bin/sh
+
+scripts=`realpath $0`
+scripts_dir=`dirname ${scripts}`
+service_path="${scripts_dir}/php_run"
+
+events=$1
+monitor_dir=$2
+monitor_file=$3
+
+serv_ctrl() {
+    if [ "${monitor_file}" = "disable" ] ; then
+        if [ "${events}" = "d" ] ; then
+            ${service_path} -s
+        elif [ "${events}" = "n" ] ; then
+            ${service_path} -k
+        fi
+    fi
+}
+
+serv_ctrl

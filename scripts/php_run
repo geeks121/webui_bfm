@@ -1,0 +1,48 @@
+#!/system/bin/sh
+
+scripts=`realpath $0`
+scripts_dir=`dirname ${scripts}`
+. /data/adb/php7/files/config/php.config
+
+php_bin="${wserv_path}/files/bin/php"
+
+start_wserv() {
+    rm -rf ${php_log_path}
+
+    local php_pid=`cat ${php_pid_path} 2> /dev/null`
+    if (cat /proc/${php_pid}/cmdline | grep -q php) ; then
+        echo "[INFO] : PHP Server is running" >> ${php_log_path}
+    fi
+    if [ -f ${php_bin} ] ; then
+        chown 0:3005 ${php_bin}
+        chmod +x ${wserv_path}/files/bin/php
+        nohup ${busybox_path} setuidgid 0:3005 ${php_bin} -S ${wserv_ip}:${wserv_port} -t ${www_path} -c ${php_ini_conf} > /dev/null 2>&1 &
+        echo -n $! > ${php_pid_path}
+        echo "[INFO] : PHP Server Started (PID: `cat ${php_pid_path}`)" >> ${php_log_path}
+        echo "[INFO] : ${wserv_ip}:${wserv_port}" >> ${php_log_path}
+        #echo "*/1 * * * * ${scripts_dir}/clash.tool -k" >> ${Clash_run_path}/root
+    else
+        echo "[ERR] : PHP Binary not found!!!" >> ${php_log_path}
+        exit 1
+    fi
+}
+
+stop_wserver() {
+    kill -9 `cat ${php_pid_path}`
+    rm -rf ${php_pid_path}
+    echo "[INFO] : PHP server stopped." >> ${php_log_path}
+}
+
+while getopts ":sk" signal ; do
+    case ${signal} in
+        s)
+            start_wserv
+            ;;
+        k)
+            stop_wserver
+            ;;
+        ?)
+            echo ""
+            ;;
+    esac
+done

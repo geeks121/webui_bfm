@@ -1,0 +1,27 @@
+@import "_config.frontend";
+
+/* Labels */
+$label: (
+    types: (
+        default: #bfbfbf,
+        success: #46a546,
+        warning: #f89406,
+        important: #c43c35,
+        error: #c43c35,
+        notice: #62cffc
+    ),
+    border-radius: 3px,
+    font-size: 10px
+);
+
+/* Classic box */
+$classic-box: (
+    color: darken($main-color, 7%),
+    background: #fff,
+    border-color: lighten($main-color, 16%),
+    header: (
+        height: 35px,
+        color: #fff,
+        font-size: 14px
+    )
+);
