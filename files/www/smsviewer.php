@@ -90,15 +90,20 @@ $currentMessages = array_slice($smsMessages, $offset, $itemsPerPage);
     <title>SIMPLE SMS VIEWER</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        /* Material Design styles */
         body {
             font-family: 'Roboto', sans-serif;
             background-color: #f5f5f5;
+            color: #000;
             margin: 0;
             padding: 0;
             display: flex;
             flex-direction: column;
             align-items: center;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .dark-mode {
+            background-color: #121212;
+            color: #ffffff;
         }
         .container {
             max-width: 600px;
@@ -109,6 +114,10 @@ $currentMessages = array_slice($smsMessages, $offset, $itemsPerPage);
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
             padding: 20px;
             box-sizing: border-box;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .dark-mode .container {
+            background-color: #333;
         }
         .header {
             display: flex;
@@ -127,13 +136,24 @@ $currentMessages = array_slice($smsMessages, $offset, $itemsPerPage);
             border-radius: 4px;
             padding: 10px;
             margin-bottom: 10px;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .dark-mode .message-item {
+            background-color: #444;
+            border-color: #555;
         }
         .message-item:hover {
             background-color: #f0f0f0;
         }
+        .dark-mode .message-item:hover {
+            background-color: #555;
+        }
         .message-item .sender {
             font-weight: bold;
             color: #1a73e8;
+        }
+        .dark-mode .message-item .sender {
+            color: #82b1ff;
         }
         .message-item .message-body {
             margin-top: 5px;
@@ -141,6 +161,9 @@ $currentMessages = array_slice($smsMessages, $offset, $itemsPerPage);
         .message-item .date {
             font-size: 0.8em;
             color: #888;
+        }
+        .dark-mode .message-item .date {
+            color: #bbb;
         }
         .form-group {
             margin-bottom: 20px;
@@ -193,12 +216,28 @@ $currentMessages = array_slice($smsMessages, $offset, $itemsPerPage);
             background-color: #ccc;
             pointer-events: none;
         }
+        .dark-mode .pagination a {
+            background-color: #555;
+        }
+        .dark-mode .pagination a:hover {
+            background-color: #333;
+        }
+        .dark-mode .pagination .active {
+            background-color: #333;
+        }
+        .dark-mode .pagination .disabled {
+            background-color: #444;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>Simple sms viewer</h1>
+            <h1>Simple SMS Viewer</h1>
+            <label>
+                Dark Mode
+                <input type="checkbox" id="dark-mode-toggle">
+            </label>
         </div>
 
         <form method="post" action="">
@@ -256,5 +295,25 @@ $currentMessages = array_slice($smsMessages, $offset, $itemsPerPage);
             <?php endif; ?>
         </div>
     </div>
+
+    <script>
+        // Check for saved dark mode preference
+        const darkModeToggle = document.getElementById('dark-mode-toggle');
+        const isDarkMode = localStorage.getItem('dark-mode') === 'enabled';
+        if (isDarkMode) {
+            document.body.classList.add('dark-mode');
+            darkModeToggle.checked = true;
+        }
+
+        // Toggle dark mode
+        darkModeToggle.addEventListener('change', () => {
+            document.body.classList.toggle('dark-mode');
+            if (document.body.classList.contains('dark-mode')) {
+                localStorage.setItem('dark-mode', 'enabled');
+            } else {
+                localStorage.removeItem('dark-mode');
+            }
+        });
+    </script>
 </body>
 </html>
