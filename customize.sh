@@ -15,6 +15,7 @@ ui_print "Installing PHP7 Webserver..."
 ui_print "[0] Creating directory..."
 mkdir -p ${MODPATH}/system/bin
 mkdir -p ${php_data_dir}
+mkdir -p ${php_data_dir}/files/tmp
 
 unzip -o "${ZIPFILE}" -x 'META-INF/*' -d $MODPATH >&2
 

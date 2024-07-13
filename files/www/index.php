@@ -125,6 +125,10 @@ $host = $x[0];
                     <i class="uil uil-folder"></i>
                     <span class="link-name">Files</span>
                 </a></li>
+                <li><a href="#" onclick="loadIframe('smsviewer.php')">
+                    <i class="uil uil-message"></i>
+                    <span class="link-name">SMS Viewer</span>
+                </a></li>
                 <li><a href="#" onclick="loadIframe('http://<?php echo $host; ?>:3001')">
                     <i class="uil uil-server"></i>
                     <span class="link-name">Terminal ttyd</span>
