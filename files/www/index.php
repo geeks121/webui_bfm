@@ -3,6 +3,13 @@ $clashlogs = "/data/adb/box/run/runs.log";
 $pid = "/data/adb/box/run/box.pid";
 $moduledir = "../modules/box_for_magisk";
 
+session_start();
+
+if (!isset($_SESSION['user_id'])) {
+    header('Location: login.php');
+    exit;
+}
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $action = $_REQUEST['actionButton'];
     switch ($action) {
@@ -106,6 +113,7 @@ $host = $x[0];
 
 </head>
 <body>
+<h2><?php echo htmlspecialchars($_SESSION['username']); ?>!</h2>
     <nav>
         <div class="logo-name">
             <div class="logo-image">
@@ -172,6 +180,10 @@ $host = $x[0];
                 <li><a href="#" onclick="showRebootPopup()">
                     <i class="uil uil-refresh"></i>
                     <span class="link-name">Reboot</span>
+                </a></li>
+                <li><a href="logout.php">
+                    <i class="uil uil-sign-out-alt"></i>
+                    <span class="link-name">LogOut</span>
                 </a></li>
                 <li class="mode">
                     <a href="#">

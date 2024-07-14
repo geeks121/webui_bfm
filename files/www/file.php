@@ -8,6 +8,17 @@ $CONFIG = '{"lang":"en","error_reporting":false,"show_hidden":true,"hide_Cols":f
  * https://tinyfilemanager.github.io
  */
 
+session_start();
+
+// Store current page URL in session as the intended redirect URL
+$_SESSION['redirect_url'] = $_SERVER['REQUEST_URI'];
+
+// Check if user is logged in
+if (!isset($_SESSION['user_id']) || !isset($_SESSION['username'])) {
+    header('Location: login.php');
+    exit;
+}
+
 //TFM version
 define('VERSION', '2.4.6');
 
@@ -55,7 +66,7 @@ $default_timezone = 'Etc/UTC'; // UTC
 $root_path = '/data/adb/';
 // Root url for links in file manager.Relative to $http_host. Variants: '', 'path/to/subfolder'
 // Will not working if $root_path will be outside of server document root
-$root_url = '';
+$root_url = '/';
 
 // Server hostname. Can set manually if wrong
 $http_host = $_SERVER['HTTP_HOST'];
