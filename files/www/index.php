@@ -139,9 +139,14 @@ $host = $x[0];
                         <span class="link-name">Clash</span>
                     </a>
                     <ul class="submenu" id="clashSubmenu">
+
                         <li><a href="#" onclick="loadIframe('http://<?php echo $host; ?>:9090/ui/#/proxies')">
                             <i class="uil uil-file-network"></i>
                             <span class="link-name">____YACD</span>
+                        </a></li>
+                        <li><a href="#" onclick="loadIframe('http://<?php echo $host; ?>/file.php?p=box%2Fclash&edit=config.yaml&env=ace')">
+                            <i class="uil uil-brackets-curly"></i>
+                            <span class="link-name">____editor</span>
                         </a></li>
                         <li><a href="#" onclick="loadIframe('executed.php')">
                             <i class="uil uil-server"></i>
