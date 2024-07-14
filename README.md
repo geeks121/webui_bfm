@@ -59,12 +59,6 @@ This PHP code snippet demonstrates how to generate a password hash using PHP's `
 - It's important to replace `'12345'` with the password you want to hash in your actual implementation.
 - Always ensure to store the generated hash securely, as it is irreversible.
 
-This snippet is useful for securely storing passwords in a database or verifying user credentials in a PHP application.
-```
-
-Save the above content into a Markdown file (e.g., `generate_password_hash.md`) to document your PHP code snippet effectively. Adjust the file name as per your preference.
-
-
 ### KSU Supported
 - **KSU module works** We supported for KSU included already don't worry
 
