@@ -153,9 +153,9 @@ $host = $x[0];
                         </a></li>
                     </ul>
                 </li>
-                <li><a href="/webui/monitor/index.php" target="_blank">
-                    <i class="uil uil-chart-line"></i>
-                    <span class="link-name">Monitor</span>
+                <li><a href="#" onclick="loadIframe('sysinfo.php')">
+                    <i class="uil uil-folder-info"></i>
+                    <span class="link-name">System Info</span>
                 </a></li>
                 <li><a href="#">
                     <i class="uil uil-telegram"></i>
