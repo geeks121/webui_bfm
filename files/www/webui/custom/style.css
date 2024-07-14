@@ -88,13 +88,13 @@ nav .logo-image{
     min-width: 45px;
 }
 nav .logo-image img{
-    width: 40px;
+    width: 0px;
     object-fit: cover;
     border-radius: 50%;
 }
 
 nav .logo-name .logo_name{
-    font-size: 22px;
+    font-size: 15px;
     font-weight: 600;
     color: var(--text-color);
     margin-left: 14px;
@@ -105,7 +105,7 @@ nav.close .logo_name{
     pointer-events: none;
 }
 nav .menu-items{
-    margin-top: 40px;
+    margin-top: 0px;
     height: calc(100% - 90px);
     display: flex;
     flex-direction: column;
@@ -240,7 +240,7 @@ nav.close ~ .dashboard .top{
 }
 .dashboard .top .search-box{
     position: relative;
-    height: 45px;
+    height: 30px;
     max-width: 600px;
     width: 100%;
     margin: 0 30px;
@@ -250,7 +250,7 @@ nav.close ~ .dashboard .top{
     border: 1px solid var(--border-color);
     background-color: var(--panel-color);
     padding: 0 25px 0 50px;
-    border-radius: 5px;
+    border-radius: 10px;
     height: 100%;
     width: 100%;
     color: var(--text-color);
@@ -268,8 +268,9 @@ nav.close ~ .dashboard .top{
     color: var(--black-light-color);
 }
 .top img{
-    width: 40px;
+    width: 10px;
     border-radius: 50%;
+    opacity: 0;
 }
 .dashboard .dash-content{
     padding-top: 50px;
