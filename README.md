@@ -6,6 +6,65 @@ Welcome to the **Box for Magisk WebUI** repository! This project provides a user
 
 The **Box for Magisk WebUI** is designed to offer a comprehensive and intuitive interface for interacting with BOX FOR ROOT. This project leverages PHP and HTML to create a responsive and feature-rich web application, allowing you to manage your BOX FOR ROOT directly from your web browser without hasle.
 
+### login detail
+## user : admin
+## password : 12345
+
+
+## PHP Code Snippet to Generate Password Hash
+save below code as pw.php
+
+```markdown
+
+
+<?php
+// Generate a new hash
+$password = '12345'; // Replace with your test password
+$hash = password_hash($password, PASSWORD_DEFAULT);
+echo "Generated hash: " . $hash;
+?>
+```
+
+### Explanation:
+This PHP code snippet demonstrates how to generate a password hash using PHP's `password_hash()` function. Here's a breakdown:
+
+1. **Setting the Password:**
+   ```php
+   $password = '12345'; // Replace with your test password
+   ```
+   Replace `'12345'` with the actual password you want to hash.
+
+2. **Generating the Hash:**
+   ```php
+   $hash = password_hash($password, PASSWORD_DEFAULT);
+   ```
+   This line generates a hash of the `$password` using the `PASSWORD_DEFAULT` algorithm, which is currently bcrypt.
+
+3. **Displaying the Generated Hash:**
+   ```php
+   echo "Generated hash: " . $hash;
+   ```
+   Finally, the code outputs the generated hash to the screen.
+
+4. **Access it througt browser:**
+   ip_gateway/pw.php
+   ```php
+   echo "Generated hash: " . $hash;
+   ```
+   Finally, the code outputs the generated hash to the screen.
+5. **put into login.php:**
+   then put your hashed password into login.php enjoy.
+
+### Notes:
+- It's important to replace `'12345'` with the password you want to hash in your actual implementation.
+- Always ensure to store the generated hash securely, as it is irreversible.
+
+This snippet is useful for securely storing passwords in a database or verifying user credentials in a PHP application.
+```
+
+Save the above content into a Markdown file (e.g., `generate_password_hash.md`) to document your PHP code snippet effectively. Adjust the file name as per your preference.
+
+
 ### KSU Supported
 - **KSU module works** We supported for KSU included already don't worry
 
@@ -18,7 +77,7 @@ The **Box for Magisk WebUI** is designed to offer a comprehensive and intuitive 
 - **PHP Webserver**: This module doesn't require php from termux, thanks for nosignal repository [Nosignal magisk php7 webserver](https://github.com/nosignals/magisk-php7-webserver) .
 
 ### Included Functionalities
-
+- **Login**: Login and Logout Added for security reason.
 - **Clash Submenu**: Access the "Logs" and "Command" links within the Clash submenu for managing Clash functionalities.
 - **Log Viewing**: Dedicated `logs.php` file for viewing logs directly from the web interface.
 - **Admin Dashboard**: An admin panel just for useful article to make your android phone powerfull.
