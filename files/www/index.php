@@ -6,7 +6,7 @@ $moduledir = "../modules/box_for_magisk";
 session_start();
 
 if (!isset($_SESSION['user_id'])) {
-    header('Location: login.php');
+    header('Location: /auth/login.php');
     exit;
 }
 
@@ -129,11 +129,11 @@ $host = $x[0];
                     <span class="link-name">Dashboard</span>
                 </a></li>
 
-                <li><a href="#" onclick="loadIframe('file.php')">
+                <li><a href="#" onclick="loadIframe('/tools/file.php')">
                     <i class="uil uil-folder"></i>
                     <span class="link-name">Files</span>
                 </a></li>
-                <li><a href="#" onclick="loadIframe('smsviewer.php')">
+                <li><a href="#" onclick="loadIframe('/tools/smsviewer.php')">
                     <i class="uil uil-message"></i>
                     <span class="link-name">SMS Viewer</span>
                 </a></li>
@@ -152,11 +152,11 @@ $host = $x[0];
                             <i class="uil uil-file-network"></i>
                             <span class="link-name">____YACD</span>
                         </a></li>
-                        <li><a href="#" onclick="loadIframe('http://<?php echo $host; ?>/file.php?p=box%2Fclash&edit=config.yaml&env=ace')">
+                        <li><a href="#" onclick="loadIframe('http://<?php echo $host; ?>/tools/file.php?p=box%2Fclash&edit=config.yaml&env=ace')">
                             <i class="uil uil-brackets-curly"></i>
                             <span class="link-name">____editor</span>
                         </a></li>
-                        <li><a href="#" onclick="loadIframe('executed.php')">
+                        <li><a href="#" onclick="loadIframe('/tools/executed.php')">
                             <i class="uil uil-server"></i>
                             <span class="link-name">____Command</span>
                         </a></li>
@@ -166,7 +166,7 @@ $host = $x[0];
                         </a></li>
                     </ul>
                 </li>
-                <li><a href="#" onclick="loadIframe('sysinfo.php')">
+                <li><a href="#" onclick="loadIframe('/tools/sysinfo.php')">
                     <i class="uil uil-folder-info"></i>
                     <span class="link-name">System Info</span>
                 </a></li>
@@ -181,9 +181,13 @@ $host = $x[0];
                     <i class="uil uil-refresh"></i>
                     <span class="link-name">Reboot</span>
                 </a></li>
-                <li><a href="logout.php">
+                <li><a href="/auth/logout.php">
                     <i class="uil uil-sign-out-alt"></i>
                     <span class="link-name">LogOut</span>
+                </a></li>
+                <li><a href="#" onclick="loadIframe('/auth/change_password.php')">
+                    <i class="uil uil-lock"></i>
+                    <span class="link-name">Change Password</span>
                 </a></li>
                 <li class="mode">
                     <a href="#">
@@ -239,7 +243,7 @@ $host = $x[0];
 
         // Function to load logs and store active tab
         function loadLogs() {
-            const url = 'logs.php';
+            const url = '/tools/logs.php';
             iframeContent.src = url;
             localStorage.setItem(activeTabKey, url); // Store active tab URL
         }

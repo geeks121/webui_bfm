@@ -1,18 +1,18 @@
 <?php
 session_start();
 
-// Check if user is already logged in
-if (isset($_SESSION['user_id']) && isset($_SESSION['username'])) {
-    // Redirect to the intended page if set, otherwise to index.php
-    $redirect_url = isset($_SESSION['redirect_url']) ? $_SESSION['redirect_url'] : 'index.php';
-    header("Location: $redirect_url");
+// Load credentials
+$credentials = include 'credentials.php';
+$stored_username = $credentials['username'];
+$stored_hashed_password = $credentials['hashed_password'];
+
+// Check if the user is already logged in and redirect accordingly
+if (isset($_SESSION['user_id'])) {
+    $redirect_to = isset($_SESSION['redirect_to']) ? $_SESSION['redirect_to'] : '/';
+    unset($_SESSION['redirect_to']);
+    header("Location: $redirect_to");
     exit;
 }
-
-// Hard-coded credentials
-$stored_username = 'admin';
-// Replace this with the hashed password generated above
-$stored_hashed_password = '$2y$10$VC7N65gPAESPJWYv9JTMDeSj92pYtIzh5Pb5piGc3HHYotpx41a7K';
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $username = $_POST['username'];
@@ -22,11 +22,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if ($username === $stored_username && password_verify($password, $stored_hashed_password)) {
         $_SESSION['user_id'] = session_id();
         $_SESSION['username'] = $username;
-
-        // Redirect based on the intended URL or default to index.php
-        $redirect_url = isset($_SESSION['redirect_url']) ? $_SESSION['redirect_url'] : 'index.php';
-        unset($_SESSION['redirect_url']); // Clear the redirect URL after use
-        header("Location: $redirect_url");
+        $redirect_to = isset($_SESSION['redirect_to']) ? $_SESSION['redirect_to'] : '/';
+        unset($_SESSION['redirect_to']);
+        header("Location: $redirect_to"); // Redirect to the last visited page or index.php
         exit;
     } else {
         $error = 'Invalid username or password.';
@@ -98,7 +96,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 <label for="password">Password</label>
                 <p>
                     <label>
-                        <input type="checkbox" onclick="togglePassword()"> <!-- Toggle function added -->
+                        <input type="checkbox" onclick="togglePassword()">
                         <span>Show Password</span>
                     </label>
                 </p>

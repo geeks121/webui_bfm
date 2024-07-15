@@ -1,4 +1,10 @@
 <?php
+// Function to execute su command and return the output
+function executeSuCommand($command) {
+    $output = [];
+    exec("su -c \"$command\"", $output);
+    return $output;
+}
 
 session_start();
 
@@ -7,18 +13,9 @@ $_SESSION['redirect_url'] = $_SERVER['REQUEST_URI'];
 
 // Check if user is logged in
 if (!isset($_SESSION['user_id']) || !isset($_SESSION['username'])) {
-    header('Location: login.php');
+    header('Location: /auth/login.php');
     exit;
 }
-
-// Function to execute su command and return the output
-function executeSuCommand($command) {
-    $output = [];
-    exec("su -c \"$command\"", $output);
-    return $output;
-}
-
-
 
 // Function to get SMS messages from the Android device
 function getSmsMessages() {

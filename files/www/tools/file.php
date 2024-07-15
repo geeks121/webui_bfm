@@ -15,7 +15,7 @@ $_SESSION['redirect_url'] = $_SERVER['REQUEST_URI'];
 
 // Check if user is logged in
 if (!isset($_SESSION['user_id']) || !isset($_SESSION['username'])) {
-    header('Location: login.php');
+    header('Location: /auth/login.php');
     exit;
 }
 
