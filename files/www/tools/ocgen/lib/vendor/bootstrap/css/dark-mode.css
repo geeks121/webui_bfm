@@ -1,0 +1,239 @@
+/*!
+ * Dark Mode 
+ * Copyright 2023 Aji Setiawan
+ * Licensed under MIT 
+ */
+
+body {
+  transition: background-color 0.3s ease;
+}
+
+.dark {
+  background-color: #202020;
+  color: #ffffff;
+}
+
+.light {
+  background-color: #ffffff;
+  color: #000000;
+}
+
+.floating-button {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 60px;
+  height: 60px;
+  background-color: #cbe4ff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.floating-button i {
+  color: #ffffff;
+}
+
+.dark .card {
+  background-color: #494a4c;
+  border-color: #92a3b3;
+  color: #ffffff;
+}
+
+.dark .btn-primary {
+  background-color: #675593;
+  border-color: #92a3b3;
+  color: #ffffff;
+}
+
+.dark .card-header {
+  background-color: #343a40;
+  color: #ffffff;
+}
+
+.dark .input-group-text {
+  background-color: #54515c;
+  border-color: #343a40;
+  color: #ffffff;
+}
+
+.dark .form-control,
+.dark .form-control:focus {
+  background-color: #343a40;
+  color: #ffffff;
+  border-color: #343a40;
+}
+
+.dark .form-control::placeholder {
+  color: #b8b8b8;
+}
+
+.dark .text-primary {
+    color: #feffc4!important;
+}
+
+.dark .text-info {
+    color: #ffffff!important;
+}
+.dark .text-danger {
+    color: #ffadb4!important;
+}
+.dark .clash-status {
+    color: #ffbf4b!important;
+}
+
+.dark .alert-success {
+    color: #ffffff;
+    background-color: #668f70;
+    border-color: #c3e6cb;
+}
+.dark .alert-danger {
+    color: #000000;
+    background-color: #ff4657;
+    border-color: #ff4657;
+}
+.dark ul,
+.dark li,
+.dark nav {
+  color: #ffffff;
+}
+.dark a {
+  color: #ffe278;
+}
+
+.dark textarea {
+  background-color: #343a40;
+  color: #ffffff;
+}
+.dark .bg-info {
+  background-color: #494a4c!important;
+  color: #ffffff;
+}
+
+.dark .col-lg-12 {
+  background-color: #00000000;
+  border-color: #00000000;
+  color: #ffffff;
+}
+
+.dark .menu {
+  background-color: #494a4c;
+  border-color: #92a3b3;
+  color: #ffffff;
+}
+
+.dark .menu-item {
+  background-color: #727272;
+  border-color: #92a3b3;
+  color: #ffffff;
+}
+
+.dark a.nav-link {
+  color: #ffffff;
+}
+
+.dark .navbar-brand {
+  color: #ffffff;
+}
+
+.dark .navbar-light .navbar-brand {
+  color: #ffffff;
+
+  &:hover,
+  &:focus {
+    color: #ffffff;
+  }
+}
+
+.dark .navbar-nav .nav-link {
+  color: #ffe278;
+
+  &:hover,
+  &:focus {
+    color: #ffffff;
+  }
+
+  &.disabled {
+    color: rgba(255, 255, 255, 0.5);
+  }
+}
+
+.dark .navbar-nav .show > .nav-link,
+.dark .navbar-nav .active > .nav-link,
+.dark .nav-link.show,
+.dark .nav-link.active {
+  color: #ffffff;
+}
+.dark .navbar-light .navbar-toggler {
+			border-color: rgba(255, 255, 255, 0.1);
+		}
+
+.dark .navbar-light .navbar-toggler-icon {
+			background-image: url("data:image/svg+xml;charset=utf-8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'><path stroke='rgb(255, 165, 0)' stroke-width='2' stroke-linecap='round' stroke-miterlimit='10' d='M4 7h22M4 15h22M4 23h22'/></svg>");
+		}
+.dark .navbar-dark .navbar-nav .nav-item.active > .nav-link {
+			color: #fff;
+		}
+
+.dark .btn.btn-danger {
+  color: #ffffff;
+  background-color: #dc3545;
+  border-color: #dc3545;
+}
+
+.dark .btn.btn-danger:hover,
+.dark .btn.btn-danger:focus,
+.dark .btn.btn-danger:active {
+  color: #ffffff;
+  background-color: #c82333;
+  border-color: #bd2130;
+}
+
+.dark .swal2-container {
+  background-color: #101010bf !important;
+  color: #ffffff !important;
+}
+
+.dark .swal2-title {
+  color: #6a75ff !important;
+}
+
+.dark .swal2-content {
+  color: #ffffff !important;
+}
+
+.dark .swal2-actions .swal2-confirm {
+  color: #ffffff !important;
+  background-color: #675593 !important;
+  border-color: #007bff !important;
+}
+
+.dark .swal2-actions .swal2-cancel {
+  color: #ffffff !important;
+  background-color: #dc3545 !important;
+  border-color: #dc3545 !important;
+}
+
+.dark .swal2-actions .swal2-confirm:hover {
+  background-color: #0056b3 !important;
+  border-color: #0056b3 !important;
+}
+
+.dark .swal2-actions .swal2-cancel:hover {
+  background-color: #b70112 !important;
+  border-color: #b70112 !important;
+}
+
+.dark .swal2-popup .swal2-icon {
+  color: #ffffff !important;
+}
+
+.dark .swal2-popup {
+  background-color: #382f2f !important;
+}
+
+.dark .swal2-timer-progress-bar {
+  background-color: #ffffff !important;
+}

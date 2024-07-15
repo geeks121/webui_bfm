@@ -160,6 +160,10 @@ $host = $x[0];
                             <i class="uil uil-server"></i>
                             <span class="link-name">____Command</span>
                         </a></li>
+                        <li><a href="#" onclick="loadIframe('/tools/ocgen/index.php')">
+                            <i class="uil uil-server"></i>
+                            <span class="link-name">____Generator</span>
+                        </a></li>
                         <li><a href="#" onclick="loadLogs()">
                             <i class="uil uil-file-alt"></i>
                             <span class="link-name">____Clash Logs</span>
