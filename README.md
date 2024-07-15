@@ -11,6 +11,7 @@ The **Box for Magisk WebUI** is designed to offer a comprehensive and intuitive 
 ## password : 12345
 
 
+### skip below tutorial, change password via webui already added.
 ## PHP Code Snippet to Generate Password Hash
 save below code as pw.php
 
