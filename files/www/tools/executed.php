@@ -1,119 +1,90 @@
 <?php
-session_start();
-
-// Store current page URL in session as the intended redirect URL
-$_SESSION['redirect_url'] = $_SERVER['REQUEST_URI'];
-
-// Check if user is logged in
-if (!isset($_SESSION['user_id']) || !isset($_SESSION['username'])) {
-    header('Location: /auth/login.php');
-    exit;
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (isset($_POST['action'])) {
+        $action = $_POST['action'];
+        if ($action === 'start_box') {
+            shell_exec('su -c /data/adb/box/scripts/box.service start && su -c /data/adb/box/scripts/box.iptables enable');
+        } elseif ($action === 'stop_box') {
+            shell_exec('su -c /data/adb/box/scripts/box.iptables disable && su -c /data/adb/box/scripts/box.service stop');
+        }
+    }
 }
 ?>
+
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Shell Command</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Device Control</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
+            font-family: 'Roboto', sans-serif;
+            background-color: #121212;
+            color: #ffffff;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
+            justify-content: center;
             height: 100vh;
-            background-color: #f4f4f4;
+            margin: 0;
         }
         .container {
-            width: 90%;
-            max-width: 600px;
-            background: white;
-            padding: 20px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            border-radius: 8px;
+            text-align: center;
         }
-        form, .buttons {
-            margin-bottom: 10px;
-        }
-        label, input, button {
-            display: block;
-            width: 100%;
-            margin-bottom: 10px;
-        }
-        input {
-            padding: 10px;
-            box-sizing: border-box;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-        button {
-            padding: 10px;
-            background-color: #007bff;
-            color: white;
+        .button {
+            width: 200px;
+            height: 60px;
+            background-color: #4caf50;
             border: none;
+            color: #ffffff;
+            padding: 15px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 20px;
+            font-weight: 500;
+            margin: 20px 10px;
             cursor: pointer;
-            border-radius: 4px;
+            border-radius: 5px;
+            transition: background-color 0.3s, box-shadow 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
-        button:hover {
-            background-color: #0056b3;
+        .button:hover {
+            background-color: #45a049;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
         }
-        .buttons button {
-            width: calc(33.333% - 8px);
-            margin-right: 8px;
+        .button-blue {
+            background-color: #2196f3;
         }
-        .buttons button:last-child {
-            margin-right: 0;
+        .button-blue:hover {
+            background-color: #1976d2;
         }
-        #log {
-            border: 1px solid #ccc;
-            padding: 10px;
-            height: 200px;
-            overflow-y: scroll;
-            background-color: #f9f9f9;
-            border-radius: 4px;
-        }
-        @media (max-width: 600px) {
-            .buttons button {
-                width: 100%;
-                margin-bottom: 10px;
-            }
-            .buttons button:last-child {
-                margin-bottom: 0;
-            }
+        .button i {
+            margin-right: 10px;
         }
     </style>
-    <script>
-        function setCommand(command) {
-            document.getElementById("command").value = command;
-        }
-        function clearLog() {
-            document.getElementById("log").innerHTML = "";
-        }
-    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
     <div class="container">
+        <h1>Device Control</h1>
         <form method="post">
-            <label for="command">Shell Command:</label>
-            <input type="text" id="command" name="command" placeholder="Enter shell command" required>
-            <button type="submit">Execute</button>
+            <input type="hidden" name="action" value="start_box">
+            <button type="submit" class="button">
+                <i class="fas fa-play"></i> Start BOX
+            </button>
         </form>
-        <div class="buttons">
-            <button onclick="setCommand('su -c /data/adb/box/scripts/box.service start &&  su -c /data/adb/box/scripts/box.iptables enable')">Start BFR</button>
-            <button onclick="setCommand('su -c /data/adb/box/scripts/box.iptables disable && su -c /data/adb/box/scripts/box.service stop')">STOP BFR</button>
-            <button onclick="clearLog()">Clear Log</button>
-	    <button onclick="setCommand('clear')">clear commad</button>
-        </div>
-        <?php
-        if ($_SERVER["REQUEST_METHOD"] == "POST") {
-            $command = escapeshellcmd($_POST["command"]);
-            $output = shell_exec($command);
-            echo "<div id='log'><pre>$output</pre></div>";
-        }
-        ?>
-        
+        <form method="post">
+            <input type="hidden" name="action" value="stop_box">
+            <button type="submit" class="button button-blue">
+                <i class="fas fa-stop"></i> Stop BOX
+            </button>
+        </form>
     </div>
 </body>
 </html>
