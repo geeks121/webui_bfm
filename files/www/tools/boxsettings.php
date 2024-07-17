@@ -199,15 +199,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['save_settings'])) {
                 <div class="input-field">
                     <select id="bin_name" name="bin_name">
                         <option value="clash" <?php echo ($current_settings['bin_name'] == 'clash') ? 'selected' : ''; ?>>Clash</option>
-                        <option value="clash_meta" <?php echo ($current_settings['bin_name'] == 'clash_meta') ? 'selected' : ''; ?>>Clash Meta</option>
+                        <option value="sing-box" <?php echo ($current_settings['bin_name'] == 'sing-box') ? 'selected' : ''; ?>>Sing-box</option>
+                         <option value="xray" <?php echo ($current_settings['bin_name'] == 'xray') ? 'selected' : ''; ?>>xray</option>
+                          <option value="v2fly" <?php echo ($current_settings['bin_name'] == 'v2fly') ? 'selected' : ''; ?>>v2fly</option>
                     </select>
                     <label for="bin_name">BIN Name</label>
                 </div>
 
                 <div class="input-field">
                     <select id="xclash_option" name="xclash_option">
-                        <option value="mihomo" <?php echo ($current_settings['xclash_option'] == 'mihomo') ? 'selected' : ''; ?>>MiHomo</option>
-                        <option value="openclash" <?php echo ($current_settings['xclash_option'] == 'openclash') ? 'selected' : ''; ?>>OpenClash</option>
+                        <option value="mihomo" <?php echo ($current_settings['xclash_option'] == 'mihomo') ? 'selected' : ''; ?>>mihomo</option>
+                        <option value="premium" <?php echo ($current_settings['xclash_option'] == 'premium') ? 'selected' : ''; ?>>premium</option>
                     </select>
                     <label for="xclash_option">XClash Option</label>
                 </div>
