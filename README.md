@@ -1,86 +1,103 @@
-# Box for Magisk WebUI
+# BOX UI
 
-Welcome to the **Box for Magisk WebUI** repository! This project provides a user-friendly web interface for BOX FOR ROOT or BOX FOR MAGISK modules, enhancing the usability and functionality of your rooted Android device.
+![logo](https://github.com/user-attachments/assets/252391a0-9f95-4a8f-8e29-cb0ff071559f)
+
 
 ## Overview
 
-The **Box for Magisk WebUI** is designed to offer a comprehensive and intuitive interface for interacting with BOX FOR ROOT. This project leverages PHP and HTML to create a responsive and feature-rich web application, allowing you to manage your BOX FOR ROOT directly from your web browser without hasle.
+BOX UI is a web-based interface for managing Box for Android tools. It supports both Magisk and KernelSU modules and provides a comprehensive suite of features to control and monitor your Android device access your device without touch it.
+## login
 
-### login detail
-## user : admin
-## password : 12345
+- **Users**: admin
+- **Password**: 12345
 
+## Features
 
-### skip below tutorial, change password via webui already added.
-## PHP Code Snippet to Generate Password Hash
-save below code as pw.php
+- **Clash Dashboard**: Comprehensive interface for managing Clash configurations.
+- **System Info**: View detailed information about your device.
+- **Tiny FM**: File manager for modifying files and configuration files.
+- **TTyd**: Terminal manager that requires Termux and Termux:Boot installed.
+- **BOX Settings**: Manage BFR settings to run core Clash, SingBox, XRay, V2Fly, and select kernel (Mihomo or Premium).
+- **SMS Inbox**: Read Android SMS via the web UI.
+- **Start/Stop Commands**: Execute commands to start or stop BOX settings.
+- **Config Generator**: Generate Clash configurations and import Vmess, Vless, Trojan, and Shadowsocks via the UI.
+- **BOX Logs**: View logs for BOX activities.
+- **Documentation**: Simple and clear documentation.
+- **Reboot Device**: Reboot your device or reboot to TWRP.
+- **Authentication**: Login, logout, and reset password functionalities.
 
-```markdown
+## Current Version
 
+[Current Release V.1.0.3](https://github.com/geeks121/webui_bfm/releases)
 
-<?php
-// Generate a new hash
-$password = '12345'; // Replace with your test password
-$hash = password_hash($password, PASSWORD_DEFAULT);
-echo "Generated hash: " . $hash;
-?>
-```
+## Installation
 
-### Explanation:
-This PHP code snippet demonstrates how to generate a password hash using PHP's `password_hash()` function. Here's a breakdown:
+### Requirements
 
-1. **Setting the Password:**
-   ```php
-   $password = '12345'; // Replace with your test password
-   ```
-   Replace `'12345'` with the actual password you want to hash.
+- Termux
+- Termux:Boot
+- TTyd
 
-2. **Generating the Hash:**
-   ```php
-   $hash = password_hash($password, PASSWORD_DEFAULT);
-   ```
-   This line generates a hash of the `$password` using the `PASSWORD_DEFAULT` algorithm, which is currently bcrypt.
+### Step-by-Step Guide to run TTyd
 
-3. **Displaying the Generated Hash:**
-   ```php
-   echo "Generated hash: " . $hash;
-   ```
-   Finally, the code outputs the generated hash to the screen.
+1. Install Termux and Termux:Boot from the Google Play Store or F-Droid.
+2. Open Termux and run the following command to install TTyd:
 
-4. **Access it througt browser:**
-   ip_gateway/pw.php
-   ```php
-   echo "Generated hash: " . $hash;
-   ```
-   Finally, the code outputs the generated hash to the screen.
-5. **put into login.php:**
-   then put your hashed password into login.php enjoy.
+    ```sh
+    pkg install ttyd
+    ```
 
-### Notes:
-- It's important to replace `'12345'` with the password you want to hash in your actual implementation.
-- Always ensure to store the generated hash securely, as it is irreversible.
+3. Create the `ttyd.sh` script to start TTyd on boot:
 
-### KSU Supported
-- **KSU module works** We supported for KSU included already don't worry
+    ```sh
+    touch ~/.termux/boot/ttyd.sh
+    ```
 
-### Key Features
+4. Add the following content copy and paste to `ttyd.sh`:
 
-- **Responsive Design**: The web interface is designed to be responsive, ensuring a seamless experience across various devices and screen sizes.
-- **User-Friendly Navigation**: The sidebar menu is positioned under the navbar for better visibility and usability, with easy access to all functionalities.
-- **Dynamic Content Loading**: Utilize iframes to load different content sections dynamically without reloading the entire page.
-- **Dark Mode Support**: Customizable dark mode with white text for better readability during nighttime usage.
-- **PHP Webserver**: This module doesn't require php from termux, thanks for nosignal repository [Nosignal magisk php7 webserver](https://github.com/nosignals/magisk-php7-webserver) .
+    ```sh
+    #!/data/data/com.termux/files/usr/bin/sh
+    termux-wake-lock
+    echo "Running script at boot..."
+    # Your commands go here
+    ttyd -p 3001 -W -t enableTrzsz=true bash
+    termux-wake-unlock
+    ```
 
-### Included Functionalities
-- **Login**: Login and Logout Added for security reason.
-- **Clash Submenu**: Access the "Logs" and "Command" links within the Clash submenu for managing Clash functionalities.
-- **Log Viewing**: Dedicated `logs.php` file for viewing logs directly from the web interface.
-- **Admin Dashboard**: An admin panel just for useful article to make your android phone powerfull.
-- **Terminal Emulator**: A UI that resembles a regular terminal emulator, capable of using nano or vim for editing files directly from the web interface powered by ttyd.
-- **FileManager**: Use Tinyfm to do file management like edit remove etc thourgh WEBUI.
-- **Command**: use this to start stop your own BOX FOR ROOT service without using APK.
-- **Monitor**: to monitoring your device, swap, cpu etc.
-- **Reboot**: reboot your device from WebUI.
+5. Make the script executable:
+
+    ```sh
+    chmod +x ~/.termux/boot/ttyd.sh
+    ```
+
+6. Follow the instructions in the BOX UI documentation to set up the webserver and other features.
+
+## Usage
+
+### Accessing BOX UI
+
+Once BOX UI is set up and running, access it via the following addresses:
+- [http://127.0.0.1:80](http://127.0.0.1:80)
+- [http://127.0.0.1](http://127.0.0.1)
+
+### Our main feature
+### Managing BOX Settings
+
+Access BOX settings through the web interface to configure BFR settings, select kernels, and manage Clash or SingBox settings.
+
+### SMS Inbox
+
+Read and manage your Android SMS directly from the web UI.
+
+### Config Generator
+
+Generate Clash configurations and import Vmess, Vless, Trojan, and Shadowsocks through the UI.
+
+## Credits
+
+- **PHP7 Webserver**: [nosignals/magisk-php7-webserver](https://github.com/nosignals/magisk-php7-webserver)
+- **BOX for Magisk**: [taamarin/box_for_magisk](https://github.com/taamarin/box_for_magisk)
+- **Config Generator**: [mitralola716/ocgen](https://github.com/mitralola716/ocgen)
 
 ### Installation
 - **Download**: download this repo as zip file.
@@ -90,18 +107,24 @@ This PHP code snippet demonstrates how to generate a password hash using PHP's `
 - **check again**: make sure when you download the module is not only folder name.
 
 ### ScreenShot
-![image](https://github.com/user-attachments/assets/1ab47b63-bd7d-4af3-b30c-7e021e3b786d)
+![image](https://github.com/user-attachments/assets/342b79e5-3169-40cc-b5c6-18a791396a5a)
+![image](https://github.com/user-attachments/assets/0f7abb32-8834-461d-9704-2c407b1425a4)
+![image](https://github.com/user-attachments/assets/6176ae44-2f9b-4674-bda9-333b57faf50f)
+![image](https://github.com/user-attachments/assets/6bdc4d0b-b7c8-45c5-8564-0840d706abea)
+![image](https://github.com/user-attachments/assets/add3e96e-0d57-44b5-8762-7d4f96833abb)
+![image](https://github.com/user-attachments/assets/fa8fbcea-0532-4fd0-9628-268002b4a277)
+![image](https://github.com/user-attachments/assets/335ca85a-bf05-4c7d-a753-b518efd970d0)
+![image](https://github.com/user-attachments/assets/35b393c5-00a7-44b3-b961-cdde41ccd121)
+![image](https://github.com/user-attachments/assets/0b62b405-33e6-41db-8dba-3ceccc1cc09a)
+![image](https://github.com/user-attachments/assets/cdfbaee3-6ff1-484a-b604-598c37ed1d2a)
 
-![image](https://github.com/user-attachments/assets/88338b68-348c-4a26-8a0a-f3999d82b314)
 
-### Contributing
+## License
 
-We welcome contributions from the community!  feel free to customize your own dashboard and making a pull request to make this dashboard awesome.
-
-### License
-
-This project is licensed under the MIT License.
+BOX UI is licensed under the latest GNU GPL v3.
 
 ---
 
-Feel free to customize this description further to suit your specific project details and requirements.
+## Contributors
+
+A big thanks to all the contributors who have helped make BOX UI what it is today!
