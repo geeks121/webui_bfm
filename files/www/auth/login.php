@@ -38,7 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <title>Login</title>
     <!-- Import Materialize CSS -->
         <!-- CSS Files -->
-    <link rel="stylesheet" href="css/materialize.min.cs" />
+    <link rel="stylesheet" href="css/materialize.min.css" />
     <!-- Custom Styles for Dark Mode -->
     <style>
         body {
