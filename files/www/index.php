@@ -357,13 +357,14 @@ $host = $x[0];
       <!-- End Custom template -->
     </div>
     <!-- iframe -->
-        <script>
+    <script>
       function loadIframe(url) {
         document.getElementById('iframe').src = url;
       };
     </script>
     <!--   Core JS Files   -->
     <script src="kaiadmin/assets/js/core/jquery-3.7.1.min.js"></script>
+    <script src="kaiadmin/assets/js/core/popper.min.js"></script>
     <<script src="kaiadmin/assets/js/core/bootstrap.min.js"></script>
 
     <!-- jQuery Scrollbar -->
