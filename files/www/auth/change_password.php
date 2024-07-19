@@ -57,7 +57,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <head>
     <title>Change Password</title>
     <!-- Import Materialize CSS -->
-    <link rel="stylesheet" href="css/materialize.min.cs" />
+    <link rel="stylesheet" href="css/materialize.min.css" />
     <!-- Custom Styles for Dark Mode -->
     <style>
         body {
