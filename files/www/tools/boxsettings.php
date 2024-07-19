@@ -183,7 +183,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 <body>
     <div class="container">
-        <h2>Settings BOX Configuration</h2>
+        <h2>Set BOX Configuration</h2>
         <form method="POST">
             <?php foreach ($dropdown_list as $item => $options): ?>
                 <div class="form-group">
