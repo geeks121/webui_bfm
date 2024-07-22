@@ -16,7 +16,7 @@ serv_ctrl() {
             ${service_ttyd} -s
         elif [ "${events}" = "n" ] ; then
             ${service_path} -k
-            ${service_ttyd} -s
+            ${service_ttyd} -k
         fi
     fi
 }
