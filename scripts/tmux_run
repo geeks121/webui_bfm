@@ -1,0 +1,10 @@
+#!/system/bin/sh
+
+scripts=`realpath $0`
+scripts_dir=`dirname ${scripts}`
+. /data/adb/php7/files/config/php.config
+
+export PATH="${tmux_bin_path}:${PATH}"
+userx=`ls -l ${tmux_bin_path}/bash | awk '{ print $3 }'`
+
+${busybox_path} setuidgid $userx:$userx bash
