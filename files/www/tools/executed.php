@@ -19,7 +19,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BLACK BOX Pilot</title>
-
+    <!-- Fonts and icons -->
+    <script src="../kaiadmin/assets/js/plugin/webfont/webfont.min.js"></script>
+    <script>
+      WebFont.load({
+        google: { families: ["Public Sans:300,400,500,600,700"] },
+        custom: {
+          families: [
+            "Font Awesome 5 Solid",
+            "Font Awesome 5 Regular",
+            "Font Awesome 5 Brands",
+            "simple-line-icons",
+          ],
+          urls: ["../kaiadmin/assets/css/fonts.min.css"],
+        },
+        active: function () {
+          sessionStorage.fonts = true;
+        },
+      });
+    </script>
     <style>
         body {
             font-family: 'Roboto', sans-serif;
@@ -70,6 +88,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             margin-right: 10px;
         }
     </style>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.0.0-beta3/css/all.min.css">
 </head>
 <body>
     <div class="container">
@@ -89,7 +108,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <form method="post">
             <input type="hidden" name="action" value="restart_box">
             <button type="submit" class="button button-blue">
-                <i class="fas fa-reboot"></i> Restart BOX
+                <i class="fas fa-rotate"></i> Re-start
             </button>
         </form>
     </div>
