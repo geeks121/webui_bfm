@@ -20,7 +20,6 @@ start_wserv() {
         echo -n $! > ${php_pid_path}
         echo "[INFO] : PHP Server Started (PID: `cat ${php_pid_path}`)" >> ${php_log_path}
         echo "[INFO] : ${wserv_ip}:${wserv_port}" >> ${php_log_path}
-        #echo "*/1 * * * * ${scripts_dir}/clash.tool -k" >> ${Clash_run_path}/root
     else
         echo "[ERR] : PHP Binary not found!!!" >> ${php_log_path}
         exit 1

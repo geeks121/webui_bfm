@@ -1,0 +1,50 @@
+#!/system/bin/sh
+
+scripts=`realpath $0`
+scripts_dir=`dirname ${scripts}`
+. /data/adb/php7/files/config/php.config
+
+ttyd_bin="${wserv_path}/files/bin/ttyd"
+
+start_ttyd() {
+
+    local ttyd_pid=`cat ${ttyd_pid_path} 2> /dev/null`
+    if [ ${ttyd_run} == "0" ]; then
+        echo "[INFO] : TTYD not running at startup" >> ${php_log_path}
+        exit 1
+    fi
+    if (cat /proc/${ttyd_pid}/cmdline | grep -q ttyd) ; then
+        echo "[INFO] : TTYD Terminal is running" >> ${php_log_path}
+    fi
+    if [ -f ${ttyd_bin} ] ; then
+        chown 0:3005 ${ttyd_bin}
+        chmod +x ${ttyd_bin}
+        nohup ${busybox_path} setuidgid 0:3005 ${ttyd_bin} -p ${ttyd_port} -W ${ttyd_firstcmd} > /dev/null 2>&1 &
+        echo -n $! > ${ttyd_pid_path}
+        echo "[INFO] : TTYD Terminal Started (PID: `cat ${ttyd_pid_path}`)" >> ${php_log_path}
+        echo "[INFO] : TTYD PORT : ${ttyd_port}" >> ${php_log_path}
+    else
+        echo "[ERR] : TTYD Binary not found!!!" >> ${php_log_path}
+        exit 1
+    fi
+}
+
+stop_ttyd() {
+    kill -9 `cat ${ttyd_pid_path}`
+    rm -rf ${ttyd_pid_path}
+    echo "[INFO] : TTYD Terminal has stopped." >> ${php_log_path}
+}
+
+while getopts ":sk" signal ; do
+    case ${signal} in
+        s)
+            start_ttyd
+            ;;
+        k)
+            stop_ttyd
+            ;;
+        ?)
+            echo ""
+            ;;
+    esac
+done

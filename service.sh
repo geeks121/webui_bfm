@@ -36,9 +36,13 @@ if [ -f ${php_pid_file} ]; then
     rm -rf ${php_pid_file}
 fi
 
+if [ -f ${ttyd_pid_file} ]; then
+    rm -rf ${ttyd_pid_file}
+fi
 # Use busybox for crond command if necessary
 # Uncomment the following line if you need to use crond
 # nohup ${busybox_path} crond -c ${php_tmp_path} > /dev/null 2>&1 &
 
 ${php_scripts_dir}/php_run -s
+${php_scripts_dir}/ttyd_run -s
 inotifyd ${php_scripts_dir}/php_inotifyd ${module_dir} >> /dev/null &
