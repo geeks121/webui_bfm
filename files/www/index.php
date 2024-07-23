@@ -176,6 +176,32 @@ $host = $x[0];
                         <span class="sub-item">BOX logs</span>
                       </a>
                     </li>
+                    <li>
+                    <a href="blackbox.php" target="_blank">
+                      <span class="sub-item">BLACK BOX</span>
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              </li>
+              <li class="nav-item">
+                <a data-bs-toggle="collapse" href="#networks">
+                  <i class="fas fa-wifi"></i>
+                  <p>Networks</p>
+                  <span class="caret"></span>
+                </a>
+                <div class="collapse" id="networks">
+                  <ul class="nav nav-collapse">
+                    <li>
+                      <a href="#" onclick="loadIframe('/tools/ipset.php')">
+                        <span class="sub-item">Set Wlan Ip</span>
+                      </a>
+                    </li>
+                    <li>
+                      <a href="#" onclick="loadIframe('/tools/modpes.php')">
+                        <span class="sub-item">Airplane Pilot</span>
+                      </a>
+                    </li>
                   </ul>
                 </div>
               </li>
