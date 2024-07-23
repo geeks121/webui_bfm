@@ -3,6 +3,7 @@
 scripts=`realpath $0`
 scripts_dir=`dirname ${scripts}`
 service_path="${scripts_dir}/php_run"
+service_ttyd="${scripts_dir}/ttyd_run"
 
 events=$1
 monitor_dir=$2
@@ -12,8 +13,10 @@ serv_ctrl() {
     if [ "${monitor_file}" = "disable" ] ; then
         if [ "${events}" = "d" ] ; then
             ${service_path} -s
+            ${service_ttyd} -s
         elif [ "${events}" = "n" ] ; then
             ${service_path} -k
+            ${service_ttyd} -k
         fi
     fi
 }
