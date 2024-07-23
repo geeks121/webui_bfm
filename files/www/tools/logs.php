@@ -17,10 +17,19 @@ $clashlogs = "/data/adb/box/run/runs.log";
             background-color: #121212;
             color: white;
         }
+        .refresh-button {
+            background-color: grey;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
     </style>
     <title>Clash Logs</title>
 </head>
 <body>
+    <button class="refresh-button" onclick="location.reload();">Refresh</button>
     <div class="card">
         <div class="card-header">
             Clash Logs
