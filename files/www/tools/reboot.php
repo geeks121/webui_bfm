@@ -23,7 +23,25 @@ if (!isset($_SESSION['user_id'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Device Control</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Fonts and icons -->
+    <script src="../kaiadmin/assets/js/plugin/webfont/webfont.min.js"></script>
+    <script>
+      WebFont.load({
+        google: { families: ["Public Sans:300,400,500,600,700"] },
+        custom: {
+          families: [
+            "Font Awesome 5 Solid",
+            "Font Awesome 5 Regular",
+            "Font Awesome 5 Brands",
+            "simple-line-icons",
+          ],
+          urls: ["../kaiadmin/assets/css/fonts.min.css"],
+        },
+        active: function () {
+          sessionStorage.fonts = true;
+        },
+      });
+    </script>
     <style>
         body {
             font-family: 'Roboto', sans-serif;
@@ -149,7 +167,6 @@ if (!isset($_SESSION['user_id'])) {
             justify-content: center;
         }
     </style>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
     <div class="container">
@@ -158,7 +175,7 @@ if (!isset($_SESSION['user_id'])) {
             <i class="fas fa-power-off"></i> Reboot Device
         </button>
         <button class="button button-blue" onclick="showModal('reboot_recovery')">
-            <i class="fas fa-sync-alt"></i> Reboot to Recovery
+            <i class="fas fa-sync"></i> Reboot to Recovery
         </button>
     </div>
 
