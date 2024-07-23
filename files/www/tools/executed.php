@@ -6,6 +6,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             shell_exec('su -c /data/adb/box/scripts/box.service start && su -c /data/adb/box/scripts/box.iptables enable');
         } elseif ($action === 'stop_box') {
             shell_exec('su -c /data/adb/box/scripts/box.iptables disable && su -c /data/adb/box/scripts/box.service stop');
+        } elseif ($action === 'restart_box') {
+            shell_exec('su -c /data/adb/box/scripts/box.service restart');
         }
     }
 }
@@ -16,7 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Device Control</title>
+    <title>BLACK BOX Pilot</title>
 
     <style>
         body {
@@ -71,7 +73,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 <body>
     <div class="container">
-        <h1>Device Control</h1>
+        <h1>BLACK BOX</h1>
         <form method="post">
             <input type="hidden" name="action" value="start_box">
             <button type="submit" class="button">
@@ -82,6 +84,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <input type="hidden" name="action" value="stop_box">
             <button type="submit" class="button button-blue">
                 <i class="fas fa-stop"></i> Stop BOX
+            </button>
+        </form>
+        <form method="post">
+            <input type="hidden" name="action" value="restart_box">
+            <button type="submit" class="button button-blue">
+                <i class="fas fa-reboot"></i> Restart BOX
             </button>
         </form>
     </div>
