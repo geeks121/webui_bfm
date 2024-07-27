@@ -107,28 +107,31 @@ function checkSignal(){
     $sims = explode(',', $sim_operator);
     
     $idonow = shell_exec("dumpsys telephony.registry");
-    preg_match_all('/mDataConnectionState=(\d+)/', $idonow, $matches);
+    preg_match_all('/mDataConnectionState=(\d+)/', $idonow, $conmatches);
     $dataConnection = [];
-    foreach ($matches[1] as $state) {
+    foreach ($conmatches[1] as $state) {
         $dataConnection[] = (int)$state;
     }
-    
-    // $slot = 1;
+    preg_match_all('/mConnectionStatus=([^}]*)/', $idonow, $typmatches);
+    $dataType = [];
+    foreach ($typmatches[1] as $state) {
+        $dataType[] = $state;
+    }
     foreach ($sims as $slot => $sim_op) {
         if (mb_strlen(trim($sim_op)) !== 0) {
             echo "<tr><td>Provider SIM" . ($slot + 1) . "</td><td>" . $sim_op . "</td></tr>";
             echo "<tr><td>Data Status</td><td>" . dataStatusCheck($dataConnection[$slot]) . "</td></tr>";
-            if ($dataConnection[$slot] == 2) {
+            preg_match('/mNetworkType=(\w+)/', $dataType[$slot], $typenya);
+            if (strtoupper($typenya[1]) == 'LTE' || (int)$typenya[1] >= 13) {
                 foreach ($lteValues as $index => $values) {
-                    echo "<tr><td>RSRP</td><td>" . $values['rsrp'] . " dBm (" . $qualityList[$index]['rsrp'] . ")</td></tr>";
-                    echo "<tr><td>RSRQ</td><td>" . $values['rsrq'] . " dB (" . $qualityList[$index]['rsrq'] . ")</td></tr>";
-                    echo "<tr><td>RSSNR</td><td>" . $values['rssnr'] . " dB (" . $qualityList[$index]['rssnr'] . ")</td></tr>";
+                    echo "<tr><td>LteRSRP</td><td>" . $values['rsrp'] . " dBm (" . $qualityList[$index]['rsrp'] . ")</td></tr>";
+                    echo "<tr><td>LteRSRQ</td><td>" . $values['rsrq'] . " dB (" . $qualityList[$index]['rsrq'] . ")</td></tr>";
+                    echo "<tr><td>LteRSSNR</td><td>" . $values['rssnr'] . " dB (" . $qualityList[$index]['rssnr'] . ")</td></tr>";
                     echo "<tr><td>Signal Quality</td><td>" . $qualityList[$index]['overall'] . "% / 100%</td></tr>";
                 }
             } else {
                 echo "<tr><td>Signal Quality</td><td>Not Available</td></tr>";
             }
-            // $slot++;
         }
     }
 }
