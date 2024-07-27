@@ -4,6 +4,178 @@ function makeTitle($title) {
     echo "<h2>$title</h2>";
 }
 
+// Function to extract LTE signal values from the input string
+function extractActiveLteSignalValues($input) {
+    $lteValues = [];
+    if (preg_match_all('/CellSignalStrengthLte: rssi=([-\d]+) rsrp=([-\d]+) rsrq=([-\d]+) rssnr=([-\d]+) .*? level=([0-9]+)/', $input, $matches, PREG_SET_ORDER)) {
+        foreach ($matches as $match) {
+            // Only consider the LTE signal if the level is greater than 1 (indicating active use)
+            if ((int)$match[5] > 0) {
+                $lteValues[] = [
+                    'rssi' => (int)$match[1],
+                    'rsrp' => (int)$match[2],
+                    'rsrq' => (int)$match[3],
+                    'rssnr' => (int)$match[4],
+                ];
+            }
+        }
+    }
+    return $lteValues;
+}
+// Function to determine the quality of the LTE signal
+function assessLteSignalQuality($lteValues) {
+    $qualityList = [];
+    foreach ($lteValues as $lte) {
+        $quality = [];
+        
+        // Assess RSRP
+        if ($lte['rsrp'] >= -80) {
+            $quality['rsrp'] = 'Excellent';
+        } elseif ($lte['rsrp'] >= -90) {
+            $quality['rsrp'] = 'Good';
+        } elseif ($lte['rsrp'] >= -100) {
+            $quality['rsrp'] = 'Moderate';
+        } elseif ($lte['rsrp'] >= -110) {
+            $quality['rsrp'] = 'Poor';
+        } else {
+            $quality['rsrp'] = 'BAD!';
+        }
+
+        // Assess RSRQ
+        if ($lte['rsrq'] >= -3) {
+            $quality['rsrq'] = 'Excellent';
+        } elseif ($lte['rsrq'] >= -10) {
+            $quality['rsrq'] = 'Good';
+        } elseif ($lte['rsrq'] >= -15) {
+            $quality['rsrq'] = 'Moderate';
+        } elseif ($lte['rsrq'] >= -20) {
+            $quality['rsrq'] = 'Poor';
+        } else {
+            $quality['rsrq'] = 'BAD!';
+        }
+
+        // Assess RSSNR
+        if ($lte['rssnr'] >= 20) {
+            $quality['rssnr'] = 'Excellent';
+        } elseif ($lte['rssnr'] >= 10) {
+            $quality['rssnr'] = 'Good';
+        } elseif ($lte['rssnr'] >= 0) {
+            $quality['rssnr'] = 'Moderate';
+        } elseif ($lte['rssnr'] >= -5) {
+            $quality['rssnr'] = 'Poor';
+        } else {
+            $quality['rssnr'] = 'BAD!';
+        }
+
+        // Calculate overall quality as an average of the individual qualities
+        $rsrpQuality = (($lte['rsrp'] + 140) / 96) * 100;
+        $rsrqQuality = (($lte['rsrq'] + 20) / 17) * 100;
+        $rssnrQuality = (($lte['rssnr'] + 5) / 35) * 100;
+        $overallQuality = ($rsrpQuality + $rsrqQuality + $rssnrQuality) / 3;
+
+        $quality['overall'] = round($overallQuality, 2);
+
+        $qualityList[] = $quality;
+    }
+    return $qualityList;
+}
+function dataStatusCheck($state) {
+    switch ($state) {
+        case 0:
+            return "Idle";
+        case 1:
+            return "Connecting";
+        case 2:
+            return "Connected";
+        case 3:
+            return "Disconnecting";
+        case 4:
+            return "Disconnected";
+    }
+}
+function checkSignal(){
+    $input = shell_exec("dumpsys telephony.registry | grep -E 'mSignalStrength='");
+    // Extract LTE signal values for active SIM slots
+    $lteValues = extractActiveLteSignalValues($input);
+    // Assess LTE signal quality for active SIM slots
+    $qualityList = assessLteSignalQuality($lteValues);
+    
+    $sim_operator = shell_exec('getprop gsm.sim.operator.alpha');
+    $sim_operator = trim($sim_operator);
+    $sims = explode(',', $sim_operator);
+    
+    $data_type = shell_exec('getprop gsm.network.type');
+    $data_type = trim($data_type);
+    $datyp = explode(',', $data_type);
+    
+    $idonow = shell_exec('dumpsys telephony.registry | grep -E "mDataConnectionState="');
+    preg_match_all('/mDataConnectionState=(\d+)/', $idonow, $conmatches);
+    $dataConnection = [];
+    foreach ($conmatches[1] as $state) {
+        $dataConnection[] = (int)$state;
+    }
+    foreach ($sims as $slot => $sim_op) {
+        if (mb_strlen(trim($sim_op)) !== 0) {
+            echo "<tr><td>Provider SIM" . ($slot + 1) . "</td><td>" . $sim_op . "</td></tr>";
+            echo "<tr><td>Data Status</td><td>" . dataStatusCheck($dataConnection[$slot]) . " (" . $datyp[$slot] . ")</td></tr>";
+            if (strtoupper($datyp[$slot]) == 'LTE') {
+                foreach ($lteValues as $index => $values) {
+                    echo "<tr><td>LteRSRP</td><td>" . $values['rsrp'] . " dBm (" . $qualityList[$index]['rsrp'] . ")</td></tr>";
+                    echo "<tr><td>LteRSRQ</td><td>" . $values['rsrq'] . " dB (" . $qualityList[$index]['rsrq'] . ")</td></tr>";
+                    echo "<tr><td>LteRSSNR</td><td>" . $values['rssnr'] . " dB (" . $qualityList[$index]['rssnr'] . ")</td></tr>";
+                    echo "<tr><td>Signal Quality</td><td>" . $qualityList[$index]['overall'] . "% / 100%</td></tr>";
+                }
+            } else {
+                echo "<tr><td>Signal Quality</td><td>Not Available</td></tr>";
+            }
+        }
+    }
+}
+
+// Function: memory
+function memory() {
+    $total_memory_kb = shell_exec('cat /proc/meminfo | grep MemTotal | awk \'{print $2}\'');
+    $total_memory_gb = intval(trim($total_memory_kb)) / 1024 / 1024; // Convert to GB
+    $total_memory_gb_rounded = round($total_memory_gb, 2);
+    $total_memory_mb_rounded = round($total_memory_gb * 1024, 2);
+
+    $free_memory_kb = shell_exec('cat /proc/meminfo | grep MemFree | awk \'{print $2}\'');
+    $free_memory_gb = intval(trim($free_memory_kb)) / 1024 / 1024; // Convert to GB
+    $free_memory_gb_rounded = round($free_memory_gb, 2);
+    $free_memory_mb_rounded = round($free_memory_gb * 1024, 2);
+
+    $buffers_memory_kb = shell_exec('cat /proc/meminfo | grep Buffers | awk \'{print $2}\'');
+    $buffers_memory_gb = intval(trim($buffers_memory_kb)) / 1024 / 1024; // Convert to GB
+    $buffers_memory_gb_rounded = round($buffers_memory_gb, 2);
+    $buffers_memory_mb_rounded = round($buffers_memory_gb * 1024, 2);
+
+    $cached_memory_kb = shell_exec('cat /proc/meminfo | grep ^Cached | awk \'{print $2}\'');
+    $cached_memory_gb = intval(trim($cached_memory_kb)) / 1024 / 1024; // Convert to GB
+    $cached_memory_gb_rounded = round($cached_memory_gb, 2);
+    $cached_memory_mb_rounded = round($cached_memory_gb * 1024, 2);
+
+    $used_memory_gb = $total_memory_gb_rounded - $free_memory_gb_rounded - $buffers_memory_gb_rounded - $cached_memory_gb_rounded;
+    $used_memory_mb = $total_memory_mb_rounded - $free_memory_mb_rounded - $buffers_memory_mb_rounded - $cached_memory_mb_rounded;
+    $used_memory_percent = round(($used_memory_gb / $total_memory_gb_rounded) * 100);
+
+    echo "<tr><td>RAM Usage</td><td>";
+    if ($used_memory_gb >= 1) {
+        echo "$used_memory_gb GB / ";
+    } else {
+        echo "$used_memory_mb MB / ";
+    }
+    if ($total_memory_gb_rounded >= 1) {
+        echo "$total_memory_gb_rounded GB ($used_memory_percent%)";
+    } else {
+        echo "$total_memory_mb_rounded MB ($used_memory_percent%)";
+    }
+    echo "</td></tr>";
+    
+    // Fetching temperature information from /sys/class/thermal/thermal_zone0/temp
+    $temperature = shell_exec('cat /sys/class/thermal/thermal_zone0/temp');
+    $temperature = round(intval(trim($temperature)) / 1000, 1); // Convert to Celsius
+    echo "<tr><td>Temperature</td><td>$temperature °C</td></tr>";
+}
 // Function: systemInfo
 function systemInfo() {
     $android_version = shell_exec('getprop ro.build.version.release');
@@ -18,40 +190,41 @@ function systemInfo() {
     $uptime_minutes = intval($uptime_seconds / 60 % 60);
     $uptime_hours = intval($uptime_seconds / 60 / 60 % 24);
     $uptime_days = intval($uptime_seconds / 60 / 60 / 24);
-
+    
+    date_default_timezone_set('Asia/Jakarta');
     $current_date = date('Y-m-d H:i:s');
 
     $device_model = shell_exec('getprop ro.product.model');
     $device_model = trim($device_model);
 
-    $sim_operator = shell_exec('getprop gsm.sim.operator.alpha');
-    $sim_operator = trim($sim_operator);
-
     echo "<tr><td>Device Model</td><td>$device_model</td></tr>";
     echo "<tr><td>OS</td><td>$os $distro</td></tr>";
-    echo "<tr><td>SIM Operator</td><td>$sim_operator</td></tr>";
     echo "<tr><td>Hostname</td><td>$hostname</td></tr>";
     echo "<tr><td>Kernel</td><td>$kernel_info</td></tr>";
     echo "<tr><td>Uptime</td><td>$uptime_days days, $uptime_hours hours, $uptime_minutes minutes</td></tr>";
     echo "<tr><td>Current date</td><td>$current_date</td></tr>";
-
-    // Fetching temperature information from /sys/class/thermal/thermal_zone0/temp
-    $temperature = shell_exec('cat /sys/class/thermal/thermal_zone0/temp');
-    $temperature = intval(trim($temperature)) / 1000; // Convert to Celsius
-
-    echo "<tr><td>Temperature</td><td>$temperature °C</td></tr>";
+    memory();
 }
 
 // Function: battery
 function battery() {
+    $ac_powered = shell_exec('dumpsys battery | grep AC | cut -d \':\' -f2');
     $battery_level = shell_exec('dumpsys battery | grep level | cut -d \':\' -f2');
     $battery_status = shell_exec('dumpsys battery | grep status | cut -d \':\' -f2');
-    $ac_powered = shell_exec('dumpsys battery | grep AC | cut -d \':\' -f2');
+    $battery_current = shell_exec('cat /sys/class/power_supply/battery/current_now');
+    if (strlen(trim($battery_current)) >= 5) {
+        $battery_current = round(shell_exec('cat /sys/class/power_supply/battery/current_now') / 1000);
+    }
+    $battery_voltage = round(shell_exec('cat /sys/class/power_supply/battery/voltage_now') / 1000000, 2);
+    $battery_temperature = shell_exec('dumpsys battery | grep temperature | cut -d \':\' -f2') / 10;
     // $ac_powered = trim($ac_powered);
-
-    echo "<tr><td>Battery Level</td><td>$battery_level%</td></tr>";
-    echo "<tr><td>Battery Status</td><td>$battery_status</td></tr>";
-    echo "<tr><td>Charging AC</td><td>$ac_powered</td></tr>";
+    
+    echo "<tr><td>Charging</td><td>$ac_powered</td></tr>";
+    echo "<tr><td>Status</td><td>$battery_status</td></tr>";
+    echo "<tr><td>Level</td><td>$battery_level%</td></tr>";
+    echo "<tr><td>Current</td><td>$battery_current mA</td></tr>";
+    echo "<tr><td>Voltage</td><td>$battery_voltage V</td></tr>";
+    echo "<tr><td>Temperature</td><td>$battery_temperature °C</td></tr>";
 }
 
 // Function: load_average
@@ -84,13 +257,23 @@ function network() {
     // Get Gateway
     $gateway = shell_exec('ip route | awk \'/default/ {print $3}\'');
     $gateway = trim($gateway);
-
+    
     // Output IP addresses
     echo "<tr><td>Network IP Address <br> IP Gateway</td><td>";
     foreach ($ip_addresses as $ip_address) {
         echo "$ip_address <br>";
     }
     echo "</td></tr>";
+    
+    $checkClient = shell_exec('dumpsys wifi | grep "Client"');
+    // Regex untuk mengekstrak jumlah perangkat yang terhubung
+    preg_match('/\.size\(\): (\d+)/', $checkClient, $matches);
+    
+    // Mengecek apakah ada hasil yang ditemukan
+    if (isset($matches[1])) {
+        $connectedClients = $matches[1];
+        echo "<tr><td>Device Connected</td><td>$connectedClients Device's</td></tr>";
+    }
 }
 
 // Function: cpu
@@ -107,54 +290,13 @@ function cpu() {
     $cpu_cache = shell_exec('cat /proc/cpuinfo | grep -i "^cache size" | awk -F": " \'{print $2}\' | head -1');
     $cpu_bogomips = shell_exec('cat /proc/cpuinfo | grep -i "^bogomips" | awk -F": " \'{print $2}\' | head -1');
 
-    $cpu_used = shell_exec('top -bn1 | grep "Cpu(s)" | awk \'{print $2 + $4 + $6}\'');
-
+    $cpu_use = shell_exec('vmstat 1 2 | tail -1 | awk \'{printf "usr: %s%% sys: %s", $13, $14}\'');
+    $cpu_used = trim($cpu_use);
+    
     echo "<tr><td>CPU Model</td><td>$cpu_info</td></tr>";
     echo "<tr><td>CPU Frequency</td><td>$cpu_freq MHz</td></tr>";
     echo "<tr><td>CPU Bogomips</td><td>$cpu_bogomips</td></tr>";
-    echo "<tr><td>CPU Used</td><td>$cpu_used%</td></tr>";
-}
-
-// Function: memory
-function memory() {
-    $total_memory_kb = shell_exec('cat /proc/meminfo | grep MemTotal | awk \'{print $2}\'');
-    $total_memory_gb = intval(trim($total_memory_kb)) / 1024 / 1024; // Convert to GB
-    $total_memory_gb_rounded = round($total_memory_gb);
-    $total_memory_mb_rounded = round($total_memory_gb * 1024);
-
-    $free_memory_kb = shell_exec('cat /proc/meminfo | grep MemFree | awk \'{print $2}\'');
-    $free_memory_gb = intval(trim($free_memory_kb)) / 1024 / 1024; // Convert to GB
-    $free_memory_gb_rounded = round($free_memory_gb);
-    $free_memory_mb_rounded = round($free_memory_gb * 1024);
-
-    $buffers_memory_kb = shell_exec('cat /proc/meminfo | grep Buffers | awk \'{print $2}\'');
-    $buffers_memory_gb = intval(trim($buffers_memory_kb)) / 1024 / 1024; // Convert to GB
-    $buffers_memory_gb_rounded = round($buffers_memory_gb);
-    $buffers_memory_mb_rounded = round($buffers_memory_gb * 1024);
-
-    $cached_memory_kb = shell_exec('cat /proc/meminfo | grep ^Cached | awk \'{print $2}\'');
-    $cached_memory_gb = intval(trim($cached_memory_kb)) / 1024 / 1024; // Convert to GB
-    $cached_memory_gb_rounded = round($cached_memory_gb);
-    $cached_memory_mb_rounded = round($cached_memory_gb * 1024);
-
-    $used_memory_gb = $total_memory_gb_rounded - $free_memory_gb_rounded - $buffers_memory_gb_rounded - $cached_memory_gb_rounded;
-    $used_memory_mb = $total_memory_mb_rounded - $free_memory_mb_rounded - $buffers_memory_mb_rounded - $cached_memory_mb_rounded;
-    $used_memory_percent = round(($used_memory_gb / $total_memory_gb_rounded) * 100);
-
-    echo "<tr><td>Total Memory</td><td>";
-    if ($total_memory_gb_rounded >= 1) {
-        echo "$total_memory_gb_rounded GB";
-    } else {
-        echo "$total_memory_mb_rounded MB";
-    }
-    echo "</td></tr>";
-    echo "<tr><td>Used Memory</td><td>";
-    if ($used_memory_gb >= 1) {
-        echo "$used_memory_gb GB ($used_memory_percent%)";
-    } else {
-        echo "$used_memory_mb MB ($used_memory_percent%)";
-    }
-    echo "</td></tr>";
+    echo "<tr><td>CPU Usage</td><td>$cpu_used%</td></tr>";
 }
 
 // Function: swap
@@ -221,7 +363,7 @@ function disk_usage() {
             color: #ffffff; /* White text */
         }
         table {
-            width: 80%; /* Adjust table width as needed */
+            width: 90%; /* Adjust table width as needed */
             margin: 0 auto; /* Center align table */
             border-collapse: collapse;
             margin-bottom: 20px;
@@ -246,23 +388,47 @@ function disk_usage() {
 <h1></h1>
 
 <table id="info-table">
-    <tr><th>Category</th><th>Details</th></tr>
-
     <?php
     // Call PHP functions to generate table rows
+    makeTitle("System-Info");
     systemInfo();
+    ?>
+</table>
+
+<table id="info-table">
+    <?php
+    // Call PHP functions to generate table rows
+    makeTitle("Battery-Info");
     battery();
-    load_average();
+    ?>
+</table>
+
+<table id="info-table">
+    <?php
+    // Call PHP functions to generate table rows
+    makeTitle("Network-Info");
     network();
+    checkSignal();
+    ?>
+</table>
+
+<table id="info-table">
+    <?php
+    // Call PHP functions to generate table rows
+    makeTitle("Cpu-Info");
     cpu();
-    memory();
+    load_average();
+    ?>
+</table>
+
+<table id="info-table">
+    <?php
+    // Call PHP functions to generate table rows
+    makeTitle("Disk-Info");
     swap();
     disk_usage();
     ?>
-
 </table>
-
-
 
 </body>
 </html>
