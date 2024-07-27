@@ -29,35 +29,35 @@ function assessLteSignalQuality($lteValues) {
         $quality = [];
         
         // Assess RSRP
-        if ($lte['rsrp'] >= -85) {
+        if ($lte['rsrp'] >= -80) {
             $quality['rsrp'] = 'Excellent';
-        } elseif ($lte['rsrp'] >= -95) {
+        } elseif ($lte['rsrp'] >= -90) {
             $quality['rsrp'] = 'Good';
-        } elseif ($lte['rsrp'] >= -110) {
+        } elseif ($lte['rsrp'] >= -100) {
             $quality['rsrp'] = 'Moderate';
-        } elseif ($lte['rsrp'] >= -120) {
+        } elseif ($lte['rsrp'] >= -110) {
             $quality['rsrp'] = 'Poor';
         } else {
             $quality['rsrp'] = 'BAD!';
         }
 
         // Assess RSRQ
-        if ($lte['rsrq'] >= -6) {
+        if ($lte['rsrq'] >= -10) {
             $quality['rsrq'] = 'Excellent';
-        } elseif ($lte['rsrq'] >= -10) {
-            $quality['rsrq'] = 'Good';
         } elseif ($lte['rsrq'] >= -15) {
-            $quality['rsrq'] = 'Moderate';
+            $quality['rsrq'] = 'Good';
         } elseif ($lte['rsrq'] >= -20) {
+            $quality['rsrq'] = 'Moderate';
+        } elseif ($lte['rsrq'] >= -25) {
             $quality['rsrq'] = 'Poor';
         } else {
             $quality['rsrq'] = 'BAD!';
         }
 
         // Assess RSSNR
-        if ($lte['rssnr'] >= 25) {
+        if ($lte['rssnr'] >= 20) {
             $quality['rssnr'] = 'Excellent';
-        } elseif ($lte['rssnr'] >= 15) {
+        } elseif ($lte['rssnr'] >= 13) {
             $quality['rssnr'] = 'Good';
         } elseif ($lte['rssnr'] >= 5) {
             $quality['rssnr'] = 'Moderate';
@@ -68,9 +68,9 @@ function assessLteSignalQuality($lteValues) {
         }
 
         // Calculate overall quality as an average of the individual qualities
-        $rsrpQuality = (($lte['rsrp'] + 120) / (-85 + 120)) * 100;
-        $rsrqQuality = (($lte['rsrq'] + 20) / (-6 + 20)) * 100;
-        $rssnrQuality = ($lte['rssnr'] / 25) * 100;
+        $rsrpQuality = (($lte['rsrp'] + 110) / (-80 + 110)) * 100;
+        $rsrqQuality = (($lte['rsrq'] + 20) / (-10 + 20)) * 100;
+        $rssnrQuality = ($lte['rssnr'] / 20) * 100;
         $overallQuality = ($rsrpQuality + $rsrqQuality + $rssnrQuality) / 3;
 
         $quality['overall'] = round($overallQuality, 2);
@@ -106,23 +106,21 @@ function checkSignal(){
     $sim_operator = trim($sim_operator);
     $sims = explode(',', $sim_operator);
     
-    $idonow = shell_exec("dumpsys telephony.registry");
+    $data_type = shell_exec('getprop gsm.network.type');
+    $data_type = trim($data_type);
+    $datyp = explode(',', $data_type);
+    
+    $idonow = shell_exec('dumpsys telephony.registry | grep "mDataConnectionState"');
     preg_match_all('/mDataConnectionState=(\d+)/', $idonow, $conmatches);
     $dataConnection = [];
     foreach ($conmatches[1] as $state) {
         $dataConnection[] = (int)$state;
     }
-    preg_match_all('/mConnectionStatus=([^}]*)/', $idonow, $typmatches);
-    $dataType = [];
-    foreach ($typmatches[1] as $state) {
-        $dataType[] = $state;
-    }
     foreach ($sims as $slot => $sim_op) {
         if (mb_strlen(trim($sim_op)) !== 0) {
             echo "<tr><td>Provider SIM" . ($slot + 1) . "</td><td>" . $sim_op . "</td></tr>";
             echo "<tr><td>Data Status</td><td>" . dataStatusCheck($dataConnection[$slot]) . "</td></tr>";
-            preg_match('/mNetworkType=(\w+)/', $dataType[$slot], $typenya);
-            if (strtoupper($typenya[1]) == 'LTE' || (int)$typenya[1] >= 13) {
+            if (strtoupper($datyp[$slot]) == 'LTE') {
                 foreach ($lteValues as $index => $values) {
                     echo "<tr><td>LteRSRP</td><td>" . $values['rsrp'] . " dBm (" . $qualityList[$index]['rsrp'] . ")</td></tr>";
                     echo "<tr><td>LteRSRQ</td><td>" . $values['rsrq'] . " dB (" . $qualityList[$index]['rsrq'] . ")</td></tr>";
