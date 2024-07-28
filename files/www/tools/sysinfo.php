@@ -4,6 +4,18 @@ function makeTitle($title) {
     echo "<h2>$title</h2>";
 }
 
+// Function to avoid unwanted/wrong value from dumpsys
+function filterArray($array) {
+    foreach ($array as $key => $values) {
+        foreach ($values as $innerKey => $value) {
+            if (abs($value) > 999) {
+                unset($array[$key]);
+                break;
+            }
+        }
+    }
+    return array_values($array);
+}
 // Function to extract LTE signal values from the input string
 function extractActiveLteSignalValues($input) {
     $lteValues = [];
@@ -20,7 +32,7 @@ function extractActiveLteSignalValues($input) {
             }
         }
     }
-    return $lteValues;
+    return filterArray($lteValues);
 }
 // Function to determine the quality of the LTE signal
 function assessLteSignalQuality($lteValues) {
@@ -124,22 +136,22 @@ function checkSignal(){
     $qualityList = assessLteSignalQuality($lteValues);
     
     $sim_operator = shell_exec('getprop gsm.sim.operator.alpha');
-    $sim_operator = trim($sim_operator);
-    $sims = explode(',', $sim_operator);
+    $sims = explode(',', trim($sim_operator));
     
     $data_type = shell_exec('getprop gsm.network.type');
-    $data_type = trim($data_type);
-    $datyp = explode(',', $data_type);
+    $datyp = explode(',', trim($data_type));
     
+    $i = 0;
     foreach ($sims as $slot => $sim_op) {
         if (mb_strlen(trim($sim_op)) !== 0) {
             echo "<tr><td>Provider SIM" . ($slot + 1) . "</td><td>" . strtoupper($sim_op) . "</td></tr>";
             echo "<tr><td>Network Type</td><td>" . $datyp[$slot] . "</td></tr>";
             if (strtoupper($datyp[$slot]) == 'LTE') {
-                echo "<tr><td>LteRSRP</td><td>" . $lteValues[$slot]['rsrp'] . " dBm (" . $qualityList[$slot]['rsrp'] . ")</td></tr>";
-                echo "<tr><td>LteRSRQ</td><td>" . $lteValues[$slot]['rsrq'] . " dB (" . $qualityList[$slot]['rsrq'] . ")</td></tr>";
-                echo "<tr><td>LteSINR</td><td>" . $lteValues[$slot]['rssnr'] . " dB (" . $qualityList[$slot]['rssnr'] . ")</td></tr>";
-                echo "<tr><td>Signal Quality</td><td>" . displayMoonRating($qualityList[$slot]['overall']) . " (" . $qualityList[$slot]['overall'] . ")</td></tr>";
+                echo "<tr><td>LteRSRP</td><td>" . $lteValues[$i]['rsrp'] . " dBm (" . $qualityList[$i]['rsrp'] . ")</td></tr>";
+                echo "<tr><td>LteRSRQ</td><td>" . $lteValues[$i]['rsrq'] . " dB (" . $qualityList[$i]['rsrq'] . ")</td></tr>";
+                echo "<tr><td>LteSINR</td><td>" . $lteValues[$i]['rssnr'] . " dB (" . $qualityList[$i]['rssnr'] . ")</td></tr>";
+                echo "<tr><td>Signal Quality</td><td>" . displayMoonRating($qualityList[$i]['overall']) . " (" . $qualityList[$i]['overall'] . ")</td></tr>";
+                $i++;
             } else {
                 echo "<tr><td>Signal Quality</td><td>Not Available</td></tr>";
             }
