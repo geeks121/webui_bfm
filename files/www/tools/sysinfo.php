@@ -4,6 +4,18 @@ function makeTitle($title) {
     echo "<h2>$title</h2>";
 }
 
+// Function to avoid unwanted/wrong value from dumpsys
+function filterArray($array) {
+    foreach ($array as $key => $values) {
+        foreach ($values as $innerKey => $value) {
+            if (abs($value) > 999) {
+                unset($array[$key]);
+                break;
+            }
+        }
+    }
+    return array_values($array);
+}
 // Function to extract LTE signal values from the input string
 function extractActiveLteSignalValues($input) {
     $lteValues = [];
@@ -20,7 +32,7 @@ function extractActiveLteSignalValues($input) {
             }
         }
     }
-    return $lteValues;
+    return filterArray($lteValues);
 }
 // Function to determine the quality of the LTE signal
 function assessLteSignalQuality($lteValues) {
@@ -29,102 +41,117 @@ function assessLteSignalQuality($lteValues) {
         $quality = [];
         
         // Assess RSRP
-        if ($lte['rsrp'] >= -80) {
+        if ($lte['rsrp'] >= -75) {
             $quality['rsrp'] = 'Excellent';
-        } elseif ($lte['rsrp'] >= -90) {
+        } elseif ($lte['rsrp'] >= -95) {
             $quality['rsrp'] = 'Good';
-        } elseif ($lte['rsrp'] >= -100) {
-            $quality['rsrp'] = 'Moderate';
         } elseif ($lte['rsrp'] >= -110) {
-            $quality['rsrp'] = 'Poor';
+            $quality['rsrp'] = 'Fair';
         } else {
-            $quality['rsrp'] = 'BAD!';
+            $quality['rsrp'] = 'Bad';
         }
 
         // Assess RSRQ
-        if ($lte['rsrq'] >= -3) {
+        if ($lte['rsrq'] >= -8) {
             $quality['rsrq'] = 'Excellent';
-        } elseif ($lte['rsrq'] >= -10) {
+        } elseif ($lte['rsrq'] >= -12) {
             $quality['rsrq'] = 'Good';
-        } elseif ($lte['rsrq'] >= -15) {
-            $quality['rsrq'] = 'Moderate';
-        } elseif ($lte['rsrq'] >= -20) {
-            $quality['rsrq'] = 'Poor';
+        } elseif ($lte['rsrq'] >= -16) {
+            $quality['rsrq'] = 'Fair';
         } else {
-            $quality['rsrq'] = 'BAD!';
+            $quality['rsrq'] = 'Bad';
         }
 
         // Assess RSSNR
         if ($lte['rssnr'] >= 20) {
             $quality['rssnr'] = 'Excellent';
-        } elseif ($lte['rssnr'] >= 10) {
+        } elseif ($lte['rssnr'] >= 13) {
             $quality['rssnr'] = 'Good';
         } elseif ($lte['rssnr'] >= 0) {
-            $quality['rssnr'] = 'Moderate';
-        } elseif ($lte['rssnr'] >= -5) {
-            $quality['rssnr'] = 'Poor';
+            $quality['rssnr'] = 'Fair';
         } else {
-            $quality['rssnr'] = 'BAD!';
+            $quality['rssnr'] = 'Bad';
         }
 
         // Calculate overall quality as an average of the individual qualities
         $rsrpQuality = (($lte['rsrp'] + 140) / 96) * 100;
         $rsrqQuality = (($lte['rsrq'] + 20) / 17) * 100;
-        $rssnrQuality = (($lte['rssnr'] + 5) / 35) * 100;
+        $rssnrQuality = (($lte['rssnr'] + 10) / 40) * 100;
         $overallQuality = ($rsrpQuality + $rsrqQuality + $rssnrQuality) / 3;
 
-        $quality['overall'] = round($overallQuality, 2);
+        $quality['overall'] = round(($overallQuality / 20), 2);
 
         $qualityList[] = $quality;
     }
     return $qualityList;
 }
-function dataStatusCheck($state) {
-    switch ($state) {
-        case 0:
-            return "Idle";
-        case 1:
-            return "Connecting";
-        case 2:
-            return "Connected";
-        case 3:
-            return "Disconnecting";
-        case 4:
-            return "Disconnected";
+
+// Fungsi untuk menampilkan rating dengan emoji bulan seperti sistem bintang
+function displayMoonRating($score) {
+    // Emoji untuk penuh, setengah, dan kosong
+    $fMoon = '🌕';   // Emoji bulan purnama (penuh)
+    $gMoon = '🌖'; // Emoji bulan gibbous (lebih dari setengah)
+    $hMoon = '🌗';    // Emoji bulan setengah
+    $qMoon = '🌘'; // Emoji bulan sabit kecil (kurang dari setengah)
+    $eMoon = '🌑';   // Emoji bulan baru (kosong)
+
+    // Membatasi skor dalam rentang 1-5
+    $score = max(1, min(5, $score));
+    
+    // Menentukan jumlah emoji penuh, setengah, dan kosong
+    $fullMoons = floor($score); // Bulan purnama penuh
+    $fraction = $score - $fullMoons; // Pecahan dari skor
+    
+    $gibbousMoons = 0;
+    $halfMoons = 0;
+    $quarterMoons = 0;
+    
+    // Menentukan emoji bulan setengah berdasarkan pecahan
+    if ($fraction >= 0.9) {
+        $fullMoons++;
+    } elseif ($fraction >= 0.7) {
+        $gibbousMoons = 1;
+    } elseif ($fraction >= 0.4) {
+        $halfMoons = 1;
+    } elseif ($fraction >= 0.1) {
+        $quarterMoons = 1;
     }
+    
+    $emptyMoons = 5 - $fullMoons - $gibbousMoons - $halfMoons - $quarterMoons; // Bulan kosong
+
+    // Membuat string rating dengan urutan yang benar
+    $rating = str_repeat($fMoon, $fullMoons) 
+            . str_repeat($gMoon, $gibbousMoons) 
+            . str_repeat($hMoon, $halfMoons) 
+            . str_repeat($qMoon, $quarterMoons)
+            . str_repeat($eMoon, $emptyMoons);
+    
+    return $rating;
 }
 function checkSignal(){
-    $input = shell_exec("dumpsys telephony.registry | grep -E 'mSignalStrength='");
+    $telephony = shell_exec("dumpsys telephony.registry | grep -E 'mSignalStrength='");
     // Extract LTE signal values for active SIM slots
-    $lteValues = extractActiveLteSignalValues($input);
+    $lteValues = extractActiveLteSignalValues($telephony);
     // Assess LTE signal quality for active SIM slots
     $qualityList = assessLteSignalQuality($lteValues);
     
     $sim_operator = shell_exec('getprop gsm.sim.operator.alpha');
-    $sim_operator = trim($sim_operator);
-    $sims = explode(',', $sim_operator);
+    $sims = explode(',', trim($sim_operator));
     
     $data_type = shell_exec('getprop gsm.network.type');
-    $data_type = trim($data_type);
-    $datyp = explode(',', $data_type);
+    $datyp = explode(',', trim($data_type));
     
-    $idonow = shell_exec('dumpsys telephony.registry | grep -E "mDataConnectionState="');
-    preg_match_all('/mDataConnectionState=(\d+)/', $idonow, $conmatches);
-    $dataConnection = [];
-    foreach ($conmatches[1] as $state) {
-        $dataConnection[] = (int)$state;
-    }
+    $i = 0;
     foreach ($sims as $slot => $sim_op) {
         if (mb_strlen(trim($sim_op)) !== 0) {
-            echo "<tr><td>Provider SIM" . ($slot + 1) . "</td><td>" . $sim_op . "</td></tr>";
-            echo "<tr><td>Data Status</td><td>" . dataStatusCheck($dataConnection[$slot]) . " (" . $datyp[$slot] . ")</td></tr>";
+            echo "<tr><td>Provider SIM" . ($slot + 1) . "</td><td>" . strtoupper($sim_op) . "</td></tr>";
+            echo "<tr><td>Network Type</td><td>" . $datyp[$slot] . "</td></tr>";
             if (strtoupper($datyp[$slot]) == 'LTE') {
-                foreach ($lteValues as $index => $values) {
-                    echo "<tr><td>LteRSRP</td><td>" . $values['rsrp'] . " dBm (" . $qualityList[$index]['rsrp'] . ")</td></tr>";
-                    echo "<tr><td>LteRSRQ</td><td>" . $values['rsrq'] . " dB (" . $qualityList[$index]['rsrq'] . ")</td></tr>";
-                    echo "<tr><td>LteRSSNR</td><td>" . $values['rssnr'] . " dB (" . $qualityList[$index]['rssnr'] . ")</td></tr>";
-                    echo "<tr><td>Signal Quality</td><td>" . $qualityList[$index]['overall'] . "% / 100%</td></tr>";
-                }
+                echo "<tr><td>LteRSRP</td><td>" . $lteValues[$i]['rsrp'] . " dBm (" . $qualityList[$i]['rsrp'] . ")</td></tr>";
+                echo "<tr><td>LteRSRQ</td><td>" . $lteValues[$i]['rsrq'] . " dB (" . $qualityList[$i]['rsrq'] . ")</td></tr>";
+                echo "<tr><td>LteSINR</td><td>" . $lteValues[$i]['rssnr'] . " dB (" . $qualityList[$i]['rssnr'] . ")</td></tr>";
+                echo "<tr><td>Signal Quality</td><td>" . displayMoonRating($qualityList[$i]['overall']) . " (" . $qualityList[$i]['overall'] . ")</td></tr>";
+                $i++;
             } else {
                 echo "<tr><td>Signal Quality</td><td>Not Available</td></tr>";
             }
