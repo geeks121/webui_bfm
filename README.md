@@ -121,9 +121,7 @@ Generate Clash configurations and import Vmess, Vless, Trojan, and Shadowsocks t
 
 ## License
 
-BOX UI is licensed under the latest GNU GPL v3.
-
----
+BOX UI is licensed under the latest MIT LICENSE--
 
 ## Contributors
 
