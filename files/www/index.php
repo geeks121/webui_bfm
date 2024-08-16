@@ -3,10 +3,9 @@ $clashlogs = "/data/adb/box/run/runs.log";
 $pid = "/data/adb/box/run/box.pid";
 $moduledir = "../modules/box_for_magisk";
 
-//set session lifetime to 1day
-ini_set('session.cookie_lifetime', 86400);
-
-session_start();
+session_start([
+  'cookie_lifetime' => 31536000, // 1 year
+]);
 
 if (!isset($_SESSION['user_id'])) {
     header('Location: /auth/login.php');
