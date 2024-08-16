@@ -4,7 +4,7 @@ function makeTitle($title) {
     echo "<h2>$title</h2>";
 }
 
-// Function to avoid unwanted/wrong value from dumpsys
+// Function to avoid unwanted/wrong value from telephony.registry
 function filterArray($array) {
     foreach ($array as $key => $values) {
         foreach ($values as $innerKey => $value) {
@@ -19,17 +19,17 @@ function filterArray($array) {
 // Function to extract LTE signal values from the input string
 function extractActiveLteSignalValues($input) {
     $lteValues = [];
-    if (preg_match_all('/CellSignalStrengthLte: rssi=([-\d]+) rsrp=([-\d]+) rsrq=([-\d]+) rssnr=([-\d]+) .*? level=([0-9]+)/', $input, $matches, PREG_SET_ORDER)) {
+    if (preg_match_all('/CellSignalStrengthLte: rssi=([-\d]+) rsrp=([-\d]+) rsrq=([-\d]+) rssnr=([-\d]+) .*? level=([1-9]+)/', $input, $matches, PREG_SET_ORDER)) {
         foreach ($matches as $match) {
             // Only consider the LTE signal if the level is greater than 1 (indicating active use)
-            if ((int)$match[5] > 0) {
-                $lteValues[] = [
-                    'rssi' => (int)$match[1],
-                    'rsrp' => (int)$match[2],
-                    'rsrq' => (int)$match[3],
-                    'rssnr' => (int)$match[4],
-                ];
-            }
+            // if ((int)$match[5] > 0) {
+            $lteValues[] = [
+                'rssi' => (int)$match[1],
+                'rsrp' => (int)$match[2],
+                'rsrq' => (int)$match[3],
+                'rssnr' => (int)$match[4],
+            ];
+            // }
         }
     }
     return filterArray($lteValues);
@@ -128,6 +128,20 @@ function displayMoonRating($score) {
     
     return $rating;
 }
+function dataStatusCheck($state) {
+    switch ($state) {
+        case 0:
+            return "Idle";
+        case 1:
+            return "Connecting";
+        case 2:
+            return "Connected";
+        case 3:
+            return "Disconnecting";
+        case 4:
+            return "Disconnected";
+    }
+}
 function checkSignal(){
     $telephony = shell_exec("dumpsys telephony.registry | grep -E 'mSignalStrength='");
     // Extract LTE signal values for active SIM slots
@@ -141,69 +155,173 @@ function checkSignal(){
     $data_type = shell_exec('getprop gsm.network.type');
     $datyp = explode(',', trim($data_type));
     
+    $idonow = shell_exec('dumpsys telephony.registry | grep -E "mDataConnectionState="');
+    preg_match_all('/mDataConnectionState=(-?\d+)/', $idonow, $conmatches);
+    $dataConnection = [];
+    foreach ($conmatches[1] as $state) {
+        if ((int)$state < 0) {
+            $dataConnection[] = 0;
+        } else {
+            $dataConnection[] = (int)$state;
+        }
+    }
+    
     $i = 0;
     foreach ($sims as $slot => $sim_op) {
         if (mb_strlen(trim($sim_op)) !== 0) {
-            echo "<tr><td>Provider SIM" . ($slot + 1) . "</td><td>" . strtoupper($sim_op) . "</td></tr>";
-            echo "<tr><td>Network Type</td><td>" . $datyp[$slot] . "</td></tr>";
-            if (strtoupper($datyp[$slot]) == 'LTE') {
-                echo "<tr><td>LteRSRP</td><td>" . $lteValues[$i]['rsrp'] . " dBm (" . $qualityList[$i]['rsrp'] . ")</td></tr>";
-                echo "<tr><td>LteRSRQ</td><td>" . $lteValues[$i]['rsrq'] . " dB (" . $qualityList[$i]['rsrq'] . ")</td></tr>";
-                echo "<tr><td>LteSINR</td><td>" . $lteValues[$i]['rssnr'] . " dB (" . $qualityList[$i]['rssnr'] . ")</td></tr>";
-                echo "<tr><td>Signal Quality</td><td>" . displayMoonRating($qualityList[$i]['overall']) . " (" . $qualityList[$i]['overall'] . ")</td></tr>";
-                $i++;
-            } else {
-                echo "<tr><td>Signal Quality</td><td>Not Available</td></tr>";
-            }
+echo "<div class='container'>";
+echo '  <div class="row">';
+// Card for Provider SIM
+echo "<div class='card-00'>";
+echo "    <i class='fas fa-sim-card'></i>";
+echo "    <h3>Provider SIM " . ($slot + 1) . "</h3>";
+echo "    <p>" . strtoupper($sim_op) . "</p>";
+echo "</div>";
+
+// Card for Network Type
+echo "<div class='card-00'>";
+echo "    <i class='fas fa-network-wired'></i>";
+echo "    <h3>Network Type</h3>";
+echo "    <p>" . $datyp[$slot] . " (" . dataStatusCheck($dataConnection[$slot]) . ")</p>";
+echo "</div>";
+echo '  </div>';
+// Conditional Cards for LTE data
+    echo '  <div class="row">';
+if (strtoupper($datyp[$slot]) == 'LTE') {
+    echo "<div class='card-00'>";
+    echo "    <i class='fas fa-signal'></i>";
+    echo "    <h3>LteRSRP</h3>";
+    echo "    <p>" . $lteValues[$i]['rsrp'] . " dBm (" . $qualityList[$i]['rsrp'] . ")</p>";
+    echo "</div>";
+
+    echo "<div class='card-00'>";
+    echo "    <i class='fas fa-signal'></i>";
+    echo "    <h3>LteRSRQ</h3>";
+    echo "    <p>" . $lteValues[$i]['rsrq'] . " dB (" . $qualityList[$i]['rsrq'] . ")</p>";
+    echo "</div>";
+
+    echo "<div class='card-00'>";
+    echo "    <i class='fas fa-signal'></i>";
+    echo "    <h3>LteSINR</h3>";
+    echo "    <p>" . $lteValues[$i]['rssnr'] . " dB (" . $qualityList[$i]['rssnr'] . ")</p>";
+    echo "</div>";
+
+    echo "<div class='card-00'>";
+    echo "    <i class='fas fa-star'></i>"; // Use an appropriate icon for signal quality
+    echo "    <h3>Signal Quality</h3>";
+    echo "    <p>" . displayMoonRating($qualityList[$i]['overall']) . "<br>(" . $qualityList[$i]['overall'] . ")</p>";
+    echo "</div>";
+
+    $i++;
+} else {
+    echo "<div class='card-00'>";
+    echo "    <i class='fas fa-exclamation-triangle'></i>"; // Use an appropriate icon for "Not Available"
+    echo "    <h3>Signal Quality</h3>";
+    echo "    <p>Not Available</p>";
+    echo "</div>";
+    echo "</div>";
+}
+
+echo "</div>";
+
         }
     }
 }
 
-// Function: memory
+// Functions for System-info
 function memory() {
     $total_memory_kb = shell_exec('cat /proc/meminfo | grep MemTotal | awk \'{print $2}\'');
     $total_memory_gb = intval(trim($total_memory_kb)) / 1024 / 1024; // Convert to GB
-    $total_memory_gb_rounded = round($total_memory_gb, 2);
-    $total_memory_mb_rounded = round($total_memory_gb * 1024, 2);
+    $total_memory_gb_rounded = round($total_memory_gb, 1);
+    $total_memory_mb_rounded = round($total_memory_gb * 1024, 1);
 
     $free_memory_kb = shell_exec('cat /proc/meminfo | grep MemFree | awk \'{print $2}\'');
     $free_memory_gb = intval(trim($free_memory_kb)) / 1024 / 1024; // Convert to GB
-    $free_memory_gb_rounded = round($free_memory_gb, 2);
-    $free_memory_mb_rounded = round($free_memory_gb * 1024, 2);
+    $free_memory_gb_rounded = round($free_memory_gb, 1);
+    $free_memory_mb_rounded = round($free_memory_gb * 1024, 1);
 
     $buffers_memory_kb = shell_exec('cat /proc/meminfo | grep Buffers | awk \'{print $2}\'');
     $buffers_memory_gb = intval(trim($buffers_memory_kb)) / 1024 / 1024; // Convert to GB
-    $buffers_memory_gb_rounded = round($buffers_memory_gb, 2);
-    $buffers_memory_mb_rounded = round($buffers_memory_gb * 1024, 2);
+    $buffers_memory_gb_rounded = round($buffers_memory_gb, 1);
+    $buffers_memory_mb_rounded = round($buffers_memory_gb * 1024, 1);
 
     $cached_memory_kb = shell_exec('cat /proc/meminfo | grep ^Cached | awk \'{print $2}\'');
     $cached_memory_gb = intval(trim($cached_memory_kb)) / 1024 / 1024; // Convert to GB
-    $cached_memory_gb_rounded = round($cached_memory_gb, 2);
-    $cached_memory_mb_rounded = round($cached_memory_gb * 1024, 2);
-
+    $cached_memory_gb_rounded = round($cached_memory_gb, 1);
+    $cached_memory_mb_rounded = round($cached_memory_gb * 1024, 1);
+    
     $used_memory_gb = $total_memory_gb_rounded - $free_memory_gb_rounded - $buffers_memory_gb_rounded - $cached_memory_gb_rounded;
     $used_memory_mb = $total_memory_mb_rounded - $free_memory_mb_rounded - $buffers_memory_mb_rounded - $cached_memory_mb_rounded;
     $used_memory_percent = round(($used_memory_gb / $total_memory_gb_rounded) * 100);
+    
+    $available_memory_gb = $free_memory_gb_rounded + $buffers_memory_gb_rounded + $cached_memory_gb_rounded;
+    $available_memory_mb = $free_memory_mb_rounded + $buffers_memory_mb_rounded + $cached_memory_mb_rounded;
 
-    echo "<tr><td>RAM Usage</td><td>";
-    if ($used_memory_gb >= 1) {
-        echo "$used_memory_gb GB / ";
-    } else {
-        echo "$used_memory_mb MB / ";
-    }
-    if ($total_memory_gb_rounded >= 1) {
-        echo "$total_memory_gb_rounded GB ($used_memory_percent%)";
-    } else {
-        echo "$total_memory_mb_rounded MB ($used_memory_percent%)";
-    }
-    echo "</td></tr>";
+echo "<div class='card-container'>";
+
+// Card for RAM Usage
+echo "<div class='card'>";
+echo "    <i class='fas fa-memory'></i>"; // Icon for RAM
+echo "    <h3>RAM Usage</h3>";
+echo "    <p>";
+if ($used_memory_gb >= 1) {
+    echo "$used_memory_gb GB / ";
+} else {
+    echo "$used_memory_mb MB / ";
+}
+if ($total_memory_gb_rounded >= 1) {
+    echo "$total_memory_gb_rounded GB ($used_memory_percent%) ";
+} else {
+    echo "$total_memory_mb_rounded MB ($used_memory_percent%) ";
+}
+if ($available_memory_gb >= 1) {
+    echo "<br>Free: $available_memory_gb GB";
+} else {
+    echo "<br>Free: $available_memory_mb MB";
+}
+echo "    </p>";
+echo "</div>";
+
+echo "</div>";
+
     
     // Fetching temperature information from /sys/class/thermal/thermal_zone0/temp
-    $temperature = shell_exec('cat /sys/class/thermal/thermal_zone0/temp');
-    $temperature = round(intval(trim($temperature)) / 1000, 1); // Convert to Celsius
-    echo "<tr><td>Temperature</td><td>$temperature °C</td></tr>";
+    // $temperature = shell_exec('cat /sys/class/thermal/thermal_zone0/temp');
+    // $temperature = round(intval(trim($temperature)) / 1000, 1); // Convert to Celsius
+    // echo "<tr><td>Temperature</td><td>$temperature °C</td></tr>";
 }
-// Function: systemInfo
+function getCpuUsage() {
+    // Read the /proc/stat file
+    $stats1 = file('/proc/stat');
+    $cpuLine1 = $stats1[0]; // The first line contains CPU stats
+    // Extract numeric values from the line
+    $values1 = array_map('intval', preg_split('/\s+/', trim($cpuLine1)));
+    list($cpu, $user1, $nice1, $system1, $idle1) = array_slice($values1, 0, 5);
+
+    // Sleep for 0.5 second to measure CPU usage
+    usleep(500000);
+
+    // Read the /proc/stat file again
+    $stats2 = file('/proc/stat');
+    $cpuLine2 = $stats2[0]; // The first line contains CPU stats
+    // Extract numeric values from the line
+    $values2 = array_map('intval', preg_split('/\s+/', trim($cpuLine2)));
+    list($cpu, $user2, $nice2, $system2, $idle2) = array_slice($values2, 0, 5);
+
+    // Calculate the differences
+    $total1 = $user1 + $nice1 + $system1 + $idle1;
+    $total2 = $user2 + $nice2 + $system2 + $idle2;
+    if ($total2 === $total1) {
+        // Avoid division by zero
+        return 0;
+    }
+    $idleDiff = $idle2 - $idle1;
+    $totalDiff = $total2 - $total1;
+    // Calculate CPU usage percentage
+    $cpuUsage = ($totalDiff - $idleDiff) / $totalDiff * 100;
+
+    return $cpuUsage;
+}
 function systemInfo() {
     $android_version = shell_exec('getprop ro.build.version.release');
     $android_version = trim($android_version);
@@ -223,17 +341,74 @@ function systemInfo() {
 
     $device_model = shell_exec('getprop ro.product.model');
     $device_model = trim($device_model);
+    
+    $cpu_used = round(getCpuUsage(), 2);
+    
+echo <<<HTML
+<div class="container">
+  <div class="row">
+    <div class="card-01">
+        <i class="fas fa-mobile-alt"></i>
+        <h3>Device Model</h3>
+        <p>{$device_model}</p>
+    </div>
+    
+    <div class="card-01">
+        <i class="fab fa-android"></i>
+        <h3>OS</h3>
+        <p>{$os} {$distro}</p>
+    </div>
+    <div class="card-01">
+        <i class="fas fa-network-wired"></i>
+        <h3>Hostname</h3>
+        <p>{$hostname}</p>
+    </div>
+    </div>
+    <div class="row">
 
-    echo "<tr><td>Device Model</td><td>$device_model</td></tr>";
-    echo "<tr><td>OS</td><td>$os $distro</td></tr>";
-    echo "<tr><td>Hostname</td><td>$hostname</td></tr>";
-    echo "<tr><td>Kernel</td><td>$kernel_info</td></tr>";
-    echo "<tr><td>Uptime</td><td>$uptime_days days, $uptime_hours hours, $uptime_minutes minutes</td></tr>";
-    echo "<tr><td>Current date</td><td>$current_date</td></tr>";
-    memory();
+    <div class="card-00">
+        <i class="fas fa-clock"></i>
+        <h3>Uptime</h3>
+        <p>{$uptime_days} days, {$uptime_hours} hours, {$uptime_minutes} minutes</p>
+    </div>
+    <div class="card-00">
+        <i class="fas fa-calendar-alt"></i>
+        <h3>Current date</h3>
+        <p>{$current_date}</p>
+    </div>
+    <div class="card-00">
+        <i class="fas fa-microchip"></i>
+        <h3>CPU Usage</h3>
+        <p>{$cpu_used}% / 100%</p>
+    </div>
+    </div>
+    <div class="row">
+    <div class="card-000">
+        <i class="fas fa-microchip"></i>
+        <h3>Kernel</h3>
+        <p>{$kernel_info}</p>
+    </div>
+</div>
+HTML;
+
+
 }
 
 // Function: battery
+function batStatusCheck($state) {
+    switch ($state) {
+        case 1:
+            return "Unknown";
+        case 2:
+            return "Charging";
+        case 3:
+            return "Discharging";
+        case 4:
+            return "Not charging";
+        case 5:
+            return "Full";
+    }
+}
 function battery() {
     $ac_powered = shell_exec('dumpsys battery | grep AC | cut -d \':\' -f2');
     $battery_level = shell_exec('dumpsys battery | grep level | cut -d \':\' -f2');
@@ -246,12 +421,43 @@ function battery() {
     $battery_temperature = shell_exec('dumpsys battery | grep temperature | cut -d \':\' -f2') / 10;
     // $ac_powered = trim($ac_powered);
     
-    echo "<tr><td>Charging</td><td>$ac_powered</td></tr>";
-    echo "<tr><td>Status</td><td>$battery_status</td></tr>";
-    echo "<tr><td>Level</td><td>$battery_level%</td></tr>";
-    echo "<tr><td>Current</td><td>$battery_current mA</td></tr>";
-    echo "<tr><td>Voltage</td><td>$battery_voltage V</td></tr>";
-    echo "<tr><td>Temperature</td><td>$battery_temperature °C</td></tr>";
+echo '<div class="container">';
+echo '  <div class="row">';
+echo '    <div class="card-01">';
+echo '        <i class="fas fa-plug"></i>';
+echo '        <h3>AC Powered</h3>';
+echo '        <p>' . strtoupper(htmlspecialchars($ac_powered)) . '</p>';
+echo '    </div>';
+echo '    <div class="card-01">';
+echo '        <i class="fas fa-battery-full"></i>';
+echo '        <h3>Status</h3>';
+echo '        <p>' . htmlspecialchars(batStatusCheck($battery_status)) . '</p>';
+echo '    </div>';
+echo '    <div class="card-01">';
+echo '        <i class="fas fa-battery-three-quarters"></i>';
+echo '        <h3>Level</h3>';
+echo '        <p>' . htmlspecialchars($battery_level) . '%</p>';
+echo '    </div>';
+echo '  </div>';
+echo '  <div class="row">';
+echo '    <div class="card-01">';
+echo '        <i class="fas fa-bolt"></i>';
+echo '        <h3>Current</h3>';
+echo '        <p>' . htmlspecialchars($battery_current) . ' mA</p>';
+echo '    </div>';
+echo '    <div class="card-01">';
+echo '        <i class="fas fa-bolt"></i>'; // Use an appropriate icon or custom icon
+echo '        <h3>Voltage</h3>';
+echo '        <p>' . htmlspecialchars($battery_voltage) . ' V</p>';
+echo '    </div>';
+echo '    <div class="card-01">';
+echo '        <i class="fas fa-thermometer-half"></i>';
+echo '        <h3>Temperature</h3>';
+echo '        <p>' . htmlspecialchars($battery_temperature) . ' °C</p>';
+echo '    </div>';
+echo '  </div>';
+echo '</div>';
+
 }
 
 // Function: load_average
@@ -270,9 +476,28 @@ function load_average() {
     $load_2_percent = round(($load_2 / $cpu_nb) * 100);
     $load_3_percent = round(($load_3 / $cpu_nb) * 100);
 
-    echo "<tr><td>Load Average (1 min)</td><td>$load_1_percent% ($load_1)</td></tr>";
-    echo "<tr><td>Load Average (5 min)</td><td>$load_2_percent% ($load_2)</td></tr>";
-    echo "<tr><td>Load Average (15 min)</td><td>$load_3_percent% ($load_3)</td></tr>";
+echo <<<HTML
+<div class="container">
+    <div class="row">
+    <div class="card-00">
+        <i class="fas fa-tachometer-alt"></i>
+        <h3>Load Average (1 min)</h3>
+        <p>{$load_1_percent}% ({$load_1})</p>
+    </div>
+    <div class="card-00">
+        <i class="fas fa-tachometer-alt"></i>
+        <h3>Load Average (5 min)</h3>
+        <p>{$load_2_percent}% ({$load_2})</p>
+    </div>
+    <div class="card-00">
+        <i class="fas fa-tachometer-alt"></i>
+        <h3>Load Average (15 min)</h3>
+        <p>{$load_3_percent}% ({$load_3})</p>
+    </div>
+    </div>
+</div>
+HTML;
+
 }
 
 // Function: network
@@ -285,23 +510,66 @@ function network() {
     $gateway = shell_exec('ip route | awk \'/default/ {print $3}\'');
     $gateway = trim($gateway);
     
-    // Output IP addresses
-    echo "<tr><td>Network IP Address <br> IP Gateway</td><td>";
-    foreach ($ip_addresses as $ip_address) {
-        echo "$ip_address <br>";
-    }
-    echo "</td></tr>";
+    // Default DNS IP addresses
+    $dumpDns = shell_exec('dumpsys connectivity | grep "DnsAddresses:" | sed -n \'s/.*DnsAddresses: \[ \([^,]*\),.*/\1/p\' | tr -d \'/\'');
+    // Regular expression to match both IPv4 and IPv6 addresses    
+    preg_match_all('/([0-9]{1,3}\.){3}[0-9]{1,3}|([a-fA-F0-9:]+:+)+[a-fA-F0-9]+/', $dumpDns, $dnsIP);
+    $dnsIPs = $dnsIP[0];
     
+    // Output IP addresses
+    echo "<div class='container'>";
+    echo '  <div class="row">';
+    echo "  <div class='card-01'>";
+    echo "    <i class='fas fa-network-wired'></i>"; // Icon for IP address and gateway
+    echo "    <h3>IP Gateway</h3>";
+    echo "    <p>";
+    if (empty($ip_addresses) && empty($gateway)) {
+        echo "Unavailable";
+    } else {
+        foreach ($ip_addresses as $ip_address) {
+            echo "$ip_address <br>";
+        }
+        if (!empty($gateway)) {
+            echo "Gateway: $gateway";
+        }
+    }
+    echo "    </p>";
+    echo "</div>";
+
+    echo "<div class='card-01'>";
+    echo "    <i class='fas fa-server'></i>"; // Icon for DNS Provider
+    echo "    <h3>DNS Provider IP Address</h3>";
+    echo "    <p>";
+    if (empty($dnsIPs)) {
+        echo "Unavailable";
+    } else {
+        foreach ($dnsIPs as $dns_address) {
+            echo "$dns_address <br>";
+        }
+    }
+    echo "    </p>";
+    echo "</div>";
+
     $checkClient = shell_exec('dumpsys wifi | grep "Client"');
-    // Regex untuk mengekstrak jumlah perangkat yang terhubung
+    // Regex to extract the number of connected devices
     preg_match('/\.size\(\): (\d+)/', $checkClient, $matches);
     
-    // Mengecek apakah ada hasil yang ditemukan
+    echo "<div class='card-01'>";
+    echo "    <i class='fas fa-users'></i>"; // Icon for connected devices
+    echo "    <h3>Device Connected</h3>";
+    echo "    <p>";
     if (isset($matches[1])) {
         $connectedClients = $matches[1];
-        echo "<tr><td>Device Connected</td><td>$connectedClients Device's</td></tr>";
+        echo "$connectedClients Device's";
+    } else {
+        echo "No Data";
     }
+    echo "    </p>";
+    echo "</div>";
+    echo '    </div>';
+    echo "</div>";
 }
+
 
 // Function: cpu
 function cpu() {
@@ -316,14 +584,29 @@ function cpu() {
 
     $cpu_cache = shell_exec('cat /proc/cpuinfo | grep -i "^cache size" | awk -F": " \'{print $2}\' | head -1');
     $cpu_bogomips = shell_exec('cat /proc/cpuinfo | grep -i "^bogomips" | awk -F": " \'{print $2}\' | head -1');
-
-    $cpu_use = shell_exec('vmstat 1 2 | tail -1 | awk \'{printf "usr: %s%% sys: %s", $13, $14}\'');
-    $cpu_used = trim($cpu_use);
     
-    echo "<tr><td>CPU Model</td><td>$cpu_info</td></tr>";
-    echo "<tr><td>CPU Frequency</td><td>$cpu_freq MHz</td></tr>";
-    echo "<tr><td>CPU Bogomips</td><td>$cpu_bogomips</td></tr>";
-    echo "<tr><td>CPU Usage</td><td>$cpu_used%</td></tr>";
+echo '<div class="container">';
+echo '  <div class="row">';
+echo '<div class="card-01">';
+echo '<i class="fas fa-microchip"></i>'; // Add Font Awesome icon for CPU
+echo '<h3>CPU Model</h3>';
+echo '<p>' . htmlspecialchars($cpu_info) . '</p>';
+echo '</div>';
+
+echo '<div class="card-01">';
+echo '<i class="fas fa-tachometer-alt"></i>'; // Add Font Awesome icon for Frequency
+echo '<h3>CPU Frequency</h3>';
+echo '<p>' . htmlspecialchars($cpu_freq) . ' MHz</p>';
+echo '</div>';
+
+echo '<div class="card-01">';
+echo '<i class="fas fa-gear"></i>'; // Add Font Awesome icon for Bogomips
+echo '<h3>CPU Bogomips</h3>';
+echo '<p>' . htmlspecialchars($cpu_bogomips) . '</p>';
+echo '</div>';
+echo '</div>';
+echo '</div>';
+
 }
 
 // Function: swap
@@ -340,21 +623,45 @@ function swap() {
         $swap_used_gb = $swap_total_gb_rounded - $swap_free_gb_rounded;
         $swap_used_percent = round(($swap_used_gb / $swap_total_gb_rounded) * 100);
 
-        echo "<tr><td>Total Swap</td><td>$swap_total_gb_rounded GB</td></tr>";
-        echo "<tr><td>Used Swap</td><td>$swap_used_gb GB ($swap_used_percent%)</td></tr>";
-    } else {
-        echo "<tr><td>Total Swap</td><td>Not Available</td></tr>";
-        echo "<tr><td>Used Swap</td><td>Not Available</td></tr>";
+echo "<div class='container'>";
+echo '  <div class="row">';
+// Card for Total Swap
+echo "<div class='card-01'>";
+echo "    <i class='fas fa-memory'></i>"; // Icon for memory or swap
+echo "    <h3>Total Swap</h3>";
+echo "    <p>";
+if (isset($swap_total_gb_rounded)) {
+    echo "$swap_total_gb_rounded GB";
+} else {
+    echo "Not Available";
+}
+echo "    </p>";
+echo "</div>";
+
+// Card for Used Swap
+echo "<div class='card-01'>";
+echo "    <i class='fas fa-tachometer-alt'></i>"; // Icon for usage or swap
+echo "    <h3>Used Swap</h3>";
+echo "    <p>";
+if (isset($swap_used_gb)) {
+    echo "$swap_used_gb GB ($swap_used_percent%)";
+} else {
+    echo "Not Available";
+}
+echo "    </p>";
+echo "</div>";
+echo "</div>";
+echo "</div>";
+
     }
 }
 
-// Function: disk_usage
-// Function: disk_usage
 function disk_usage() {
-    $disk_usage = shell_exec('df -h | grep "/dev"');
-
+    $disk_usage = shell_exec('df -h | grep "/dev/root"');
     $disk_usage_lines = explode("\n", trim($disk_usage));
 
+    echo "<div class='container'>"; // Start card container
+    echo '  <div class="row">';
     foreach ($disk_usage_lines as $line) {
         $line_parts = preg_split('/\s+/', $line);
         $filesystem = $line_parts[0];
@@ -363,99 +670,375 @@ function disk_usage() {
         $available = $line_parts[3];
         $used_percent = $line_parts[4];
 
-        echo "<tr><td>Disk ($filesystem)</td><td>$used / $size ($used_percent used)</td></tr>";
+        // Card for Disk Usage
+        echo "<div class='card-000'>";
+        echo "    <i class='fas fa-hdd'></i>"; // Icon for disk
+        echo "    <div class='card-content'>";
+        echo "        <h3>Disk ($filesystem)</h3>";
+        echo "        <p>$used / $size ($used_percent% used)</p>";
+        echo "    </div>";
+        echo "</div>";
     }
+    echo "</div>";
+    echo "</div>"; // End card container
 }
+
 
 ?>
 
-
-
-
-
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Your Android Info</title>
+    <title>System Info</title>
+    <!--<link rel="stylesheet" href="style.css"-->
+     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        body {
-            background-color: #333333; /* Dark background */
-            color: #ffffff; /* Light text */
-            font-family: Arial, sans-serif; /* Example font */
-            text-align: center; /* Center align text */
-        }
-        h2 {
-            color: #ffffff; /* White text */
-        }
-        table {
-            width: 90%; /* Adjust table width as needed */
-            margin: 0 auto; /* Center align table */
-            border-collapse: collapse;
-            margin-bottom: 20px;
-        }
-        table, th, td {
-            border: 1px solid #ffffff; /* White borders */
-        }
-        th, td {
-            padding: 10px;
-            text-align: left;
-        }
-        th {
-            background-color: #555555; /* Dark grey header */
-        }
-        tr:nth-child(even) {
-            background-color: #666666; /* Darker grey */
-        }
+      * {
+        box-sizing: border-box;
+      }
+  
+      body {
+        font-family: "Open Sans", sans-serif;
+        background: #080808;
+        color: white;
+        text-align: center;
+        margin: 0;
+        padding: 0;
+      }
+      .logo {
+        text-align: center;
+        margin: 10px auto;
+      }
+      .logo img {
+        width: 200px; /* Adjust width to make the logo smaller */
+        height: auto;
+      }
+      #main {
+        position: relative;
+        list-style: none;
+        background: #080808;
+        font-weight: 400;
+        font-size: 0;
+        text-transform: uppercase;
+        display: inline-block;
+        padding: 0;
+        margin: 1px auto;
+        height: 55px; /* Adjust height to match tab height */
+      }
+  
+      #main li {
+        font-size: 0.8rem;
+        display: inline-block;
+        position: relative;
+        padding: 15px 20px;
+        cursor: pointer;
+        z-index: 5;
+        min-width: 120px;
+        height: 100%; /* Make sure li items take full height */
+        line-height: 32px; /* Vertically center text in the li items */
+        margin: 0;
+      }
+  
+      .drop {
+        overflow: hidden;
+        list-style: none;
+        position: absolute;
+        padding: 0;
+        width: 100%;
+        left: 0;
+        top: 60px; /* Position below the nav bar */
+      }
+  
+      .drop div {
+        -webkit-transform: translate(0, -100%);
+        -moz-transform: translate(0, -100%);
+        -ms-transform: translate(0, -100%);
+        transform: translate(0, -100%);
+        -webkit-transition: all 0.5s 0.1s;
+        -moz-transition: all 0.5s 0.1s;
+        -ms-transition: all 0.5s 0.1s;
+        transition: all 0.5s 0.1s;
+        position: relative;
+      }
+  
+      .drop li {
+        display: block;
+        padding: 0;
+        width: 100%;
+        background: #374954 !important;
+      }
+  
+      #marker {
+        height: 6px;
+        background: #3E8760 !important;
+        position: absolute;
+        bottom: 0;
+        width: 120px;
+        z-index: 2;
+        -webkit-transition: all 0.35s;
+        -moz-transition: all 0.35s;
+        -ms-transition: all 0.35s;
+        transition: all 0.35s;
+      }
+  
+      #main li:nth-child(1):hover ul div {
+        -webkit-transform: translate(0, 0);
+        -moz-transform: translate(0, 0);
+        -ms-transform: translate(0, 0);
+        transform: translate(0, 0);
+      }
+  
+      #main li:nth-child(1):hover ~ #marker {
+        -webkit-transform: translate(0px, 0);
+        -moz-transform: translate(0px, 0);
+        -ms-transform: translate(0px, 0);
+        transform: translate(0px, 0);
+      }
+  
+      #main li:nth-child(2):hover ul div {
+        -webkit-transform: translate(0, 0);
+        -moz-transform: translate(0, 0);
+        -ms-transform: translate(0, 0);
+        transform: translate(0, 0);
+      }
+  
+      #main li:nth-child(2):hover ~ #marker {
+        -webkit-transform: translate(120px, 0);
+        -moz-transform: translate(120px, 0);
+        -ms-transform: translate(120px, 0);
+        transform: translate(120px, 0);
+      }
+  
+      #main li:nth-child(3):hover ul div {
+        -webkit-transform: translate(0, 0);
+        -moz-transform: translate(0, 0);
+        -ms-transform: translate(0, 0);
+        transform: translate(0, 0);
+      }
+  
+      #main li:nth-child(3):hover ~ #marker {
+        -webkit-transform: translate(240px, 0);
+        -moz-transform: translate(240px, 0);
+        -ms-transform: translate(240px, 0);
+        transform: translate(240px, 0);
+      }
+  
+      #main li:nth-child(4):hover ul div {
+        -webkit-transform: translate(0, 0);
+        -moz-transform: translate(0, 0);
+        -ms-transform: translate(0, 0);
+        transform: translate(0, 0);
+      }
+  
+      #main li:nth-child(4):hover ~ #marker {
+        -webkit-transform: translate(360px, 0);
+        -moz-transform: translate(360px, 0);
+        -ms-transform: translate(360px, 0);
+        transform: translate(360px, 0);
+      }
+  
+      .tab-content {
+        display: none;
+        width: 100%;
+        
+      }
+  
+      .tab-content iframe {
+        width: 100%;
+        height: calc(100vh - 60px); /* Adjust based on header/footer height */
+        border: none;
+      }
+      
+
+      /* card */
+      body{
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+}
+
+.container{
+  margin: 20px;
+}
+
+.row{
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.card-000{
+  background: #0a0e0d;
+  text-align: center;
+  position: relative;
+  padding: 20px;
+  align-items: center;
+  flex: 1;
+  max-width: 500px;
+  height: 150px;
+  margin: 10px;
+  border-radius: 5px;
+  box-shadow: 0 0 5px rgba(94, 89, 89, 0.2);
+}
+
+.card-00{
+  background: #0a0e0d;
+  text-align: center;
+  position: relative;
+  padding: 20px;
+  align-items: center;
+  flex: 1;
+  max-width: 300px;
+  height: 150px;
+  margin: 10px;
+  border-radius: 5px;
+  box-shadow: 0 0 5px rgba(94, 89, 89, 0.2);
+}
+
+.card-01{
+  background: #03D29F;
+  text-align: center;
+  align-items: center;
+  position: relative;
+  padding: 20px;
+  flex: 1;
+  max-width: 300px;
+  height: 150px;
+  margin: 10px;
+  border-radius: 5px;
+  box-shadow: 0 0 5px rgba(94, 89, 89, 0.2);
+}
+
+.card-02{
+  background: #0470ddd0;
+  text-align: center;
+  position: relative;
+    padding: 20px;
+  flex: 1;
+  max-width: 460px;
+  height: 200px;
+  margin: 10px;
+  border-radius: 5px;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+}
+
+.card-03{
+  background: #FF7675;
+  position: relative;
+  padding: 20px;
+  flex: 1;
+  max-width: 940px;
+  height: 300px;
+  margin: 10px;
+  border-radius: 5px;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+}
+
+@media (max-width:800px){
+
+  .card-00{
+    flex: 100%;
+    max-width: 600px;
+  }
+  .card-01{
+    flex: 100%;
+    max-width: 600px;
+  }
+
+  .card-02{
+    flex: 100%;
+    max-width: 600px;
+  }
+
+  .card-03{
+    flex: 100%;
+    max-width: 600px;
+  }
+}
+
     </style>
-</head>
-<body>
+  </head>
 
-<h1></h1>
+  <body>
+    <div class="logo">
+      <img src="../webui/assets/img/logo.png" alt="Logo">
+  </div>
+  
+  <ul id="main">
+      <li onclick="showTab('device')">System</li>
+      <li onclick="showTab('battery')">Battery</li>
+      <li onclick="showTab('network')">Networks</li>
+      <!--<li onclick="toggleSubmenu()">Config
+          <ul class="drop">
+              <div id="config">
+                  <li onclick="showTab('clash')">Clash</li>
+                  <li onclick="showTab('sing-box')">Sing-Box</li>
+              </div>
+          </ul>
+      </li>-->
+      <li onclick="showTab('cpu')">CPU</li>
+      <li onclick="showTab('disk')">DISK INFO</li>
+      <div id="marker"></div>
+  </ul>
+  
+  <div id="device" class="tab-content">
+    <table>
+        <?php systemInfo(); ?>
+    </table>
 
-<table id="info-table">
-    <?php
-    // Call PHP functions to generate table rows
-    makeTitle("System-Info");
-    systemInfo();
-    ?>
-</table>
-
-<table id="info-table">
-    <?php
-    // Call PHP functions to generate table rows
-    makeTitle("Battery-Info");
-    battery();
-    ?>
-</table>
-
-<table id="info-table">
-    <?php
-    // Call PHP functions to generate table rows
-    makeTitle("Network-Info");
-    network();
-    checkSignal();
-    ?>
-</table>
-
-<table id="info-table">
-    <?php
-    // Call PHP functions to generate table rows
-    makeTitle("Cpu-Info");
+  </div>
+  <div id="battery" class="tab-content">
+    <table>
+        <?php battery(); ?>
+    </table>
+  </div>
+  <div id="network" class="tab-content">
+  <table>
+                    <?php network(); checkSignal(); ?>
+                </table>
+  </div>
+  <div id="cpu" class="tab-content">
+  <?php
     cpu();
     load_average();
     ?>
-</table>
-
-<table id="info-table">
-    <?php
-    // Call PHP functions to generate table rows
-    makeTitle("Disk-Info");
+  </div>
+  <div id="disk" class="tab-content">
+  <?php
     swap();
     disk_usage();
     ?>
-</table>
+  </div>
 
-</body>
+    <script>
+      function showTab(tabId) {
+    // Hide all tab contents
+    var tabContents = document.querySelectorAll('.tab-content');
+    tabContents.forEach(function(content) {
+        content.style.display = 'none';
+    });
+
+    // Show the selected tab content
+    var selectedTab = document.getElementById(tabId);
+    selectedTab.style.display = 'block';
+}
+
+function toggleSubmenu() {
+    var submenu = document.getElementById('config');
+    if (submenu.style.display === 'block') {
+        submenu.style.display = 'none';
+    } else {
+        submenu.style.display = 'block';
+    }
+}
+
+// Initial tab setup: show the first tab
+showTab('device');
+
+    </script>
+
+  </body>
 </html>
