@@ -257,10 +257,10 @@ function memory() {
     $available_memory_gb = $free_memory_gb_rounded + $buffers_memory_gb_rounded + $cached_memory_gb_rounded;
     $available_memory_mb = $free_memory_mb_rounded + $buffers_memory_mb_rounded + $cached_memory_mb_rounded;
 
-echo "<div class='card-container'>";
-
+echo "<div class='container'>";
+echo '  <div class="row">';
 // Card for RAM Usage
-echo "<div class='card'>";
+echo "<div class='card-00'>";
 echo "    <i class='fas fa-memory'></i>"; // Icon for RAM
 echo "    <h3>RAM Usage</h3>";
 echo "    <p>";
@@ -281,7 +281,7 @@ if ($available_memory_gb >= 1) {
 }
 echo "    </p>";
 echo "</div>";
-
+echo "</div>";
 echo "</div>";
 
     
@@ -1009,6 +1009,7 @@ function disk_usage() {
   <div id="disk" class="tab-content">
   <?php
     swap();
+    memory();
     disk_usage();
     ?>
   </div>
