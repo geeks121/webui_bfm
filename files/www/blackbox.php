@@ -253,6 +253,11 @@ $host = $x[0];
         submenu.style.display = 'block';
       }
     }
+
+    // Show the 'Service' tab content on page load
+    document.addEventListener("DOMContentLoaded", function() {
+      showIframe('service');
+    });
   </script>
 </body>
 </html>
