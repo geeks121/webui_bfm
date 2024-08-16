@@ -3,6 +3,9 @@ $clashlogs = "/data/adb/box/run/runs.log";
 $pid = "/data/adb/box/run/box.pid";
 $moduledir = "../modules/box_for_magisk";
 
+//set session lifetime to 1day
+ini_set('session.cookie_lifetime', 86400);
+
 session_start();
 
 if (!isset($_SESSION['user_id'])) {
@@ -105,7 +108,7 @@ $host = $x[0];
           <div class="sidebar-content">
             <ul class="nav nav-secondary">
               <li class="nav-item">
-                <a href="#" onclick="loadIframe('http://<?php echo $host; ?>:9090/ui/')">
+                <a href="#" onclick="loadIframe('http://<?php echo $host; ?>:9090/ui/?hostname=<?php echo $host; ?>#/proxies')">
                   <i class="fas fa-home"></i>
                   <p>Clash Dashboard</p>
                   <span class="badge badge-secondary">1</span>
@@ -364,7 +367,7 @@ $host = $x[0];
                    <!-- Main Content -->
         <div class="content">
           <!-- Iframe -->
-          <!--<iframe class="dashboard-iframe" id="iframe" src="http://<?php echo $host; ?>:9090/ui/"></iframe>-->
+          <!--<iframe class="dashboard-iframe" id="iframe" src="http://<?php echo $host; ?>:9090/ui/?hostname=<?php echo $host; ?>#/proxies"></iframe>-->
           <iframe class="dashboard-iframe" id="iframe" src="/tools/sysinfo.php"></iframe>
                   
         </div>
