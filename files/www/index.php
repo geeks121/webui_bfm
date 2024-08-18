@@ -7,7 +7,11 @@ session_start([
   'cookie_lifetime' => 31536000, // 1 year
 ]);
 
-if (!isset($_SESSION['user_id'])) {
+// Include the config file
+include 'auth/config.php';
+
+// Check if login is enabled and if the user is not logged in
+if (LOGIN_ENABLED && !isset($_SESSION['user_id'])) {
     header('Location: /auth/login.php');
     exit;
 }
@@ -204,6 +208,11 @@ $host = $x[0];
                         <span class="sub-item">Airplane Pilot</span>
                       </a>
                     </li>
+                    <li>
+                      <a href="#" onclick="loadIframe('/tools/vnstat.php')">
+                        <span class="sub-item">Vnstat Bandwith</span>
+                      </a>
+                    </li>
                   </ul>
                 </div>
               </li>
@@ -234,6 +243,11 @@ $host = $x[0];
                     <li>
                       <a href="#" onclick="loadIframe('/auth/change_password.php')">
                         <span class="sub-item">Reset Password</span>
+                      </a>
+                    </li>
+                    <li>
+                      <a href="#" onclick="loadIframe('/auth/manage_login.php')">
+                        <span class="sub-item">enable/disable login</span>
                       </a>
                     </li>
                     <!--<li>

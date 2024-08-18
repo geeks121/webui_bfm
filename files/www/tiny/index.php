@@ -1,4 +1,17 @@
 <?php
+
+require_once '/data/adb/php7/files/www/auth/auth_functions.php';
+
+// If login is disabled, set the current page but do not redirect to login
+if (isset($_SESSION['login_disabled']) && $_SESSION['login_disabled'] === true) {
+    // Login is disabled, handle accordingly
+    // You can show a message or just let the user stay on the page
+    //echo "<p>Login is currently disabled.</p>";
+} else {
+    // Proceed to check if the user is logged in
+    checkUserLogin();
+}
+
 //Default Configuration
 $CONFIG = '{"lang":"en","error_reporting":false,"show_hidden":true,"hide_Cols":false,"theme":"dark"}';
 

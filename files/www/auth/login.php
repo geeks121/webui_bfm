@@ -6,6 +6,25 @@ $credentials = include 'credentials.php';
 $stored_username = $credentials['username'];
 $stored_hashed_password = $credentials['hashed_password'];
 
+$config_file = '/data/adb/php7/files/www/auth/config.json';
+
+if (!file_exists($config_file)) {
+    die('Error: Configuration file not found.');
+}
+
+$config = json_decode(file_get_contents($config_file), true);
+
+// Define the LOGIN_ENABLED constant based on the JSON file
+define('LOGIN_ENABLED', $config['LOGIN_ENABLED']);
+
+// Check if login is disabled
+$login_disabled = !LOGIN_ENABLED;
+
+// If login is disabled, set a session flag or a message variable
+if ($login_disabled) {
+    $_SESSION['login_disabled'] = true;
+}
+
 // Check if the user is already logged in and redirect accordingly
 if (isset($_SESSION['user_id'])) {
     $redirect_to = isset($_SESSION['redirect_to']) ? $_SESSION['redirect_to'] : '/';
@@ -24,13 +43,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $_SESSION['username'] = $username;
         $redirect_to = isset($_SESSION['redirect_to']) ? $_SESSION['redirect_to'] : '/';
         unset($_SESSION['redirect_to']);
-        header("Location: $redirect_to"); // Redirect to the last visited page or index.php
+        header("Location: $redirect_to");
         exit;
     } else {
         $error = 'Invalid username or password.';
     }
 }
 ?>
+
 
 <!DOCTYPE html>
 <html>

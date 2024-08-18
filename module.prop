@@ -1,6 +1,6 @@
 id=UNIVERSALBFRWEBUI
 name=Universal BFR WEBUI
-version=v1.0.5
-versionCode=20240723
+version=v1.0.6
+versionCode=20240818
 author=ZAPBER
 description= Universal webui for box for magisk with php webserver , use gateway or 127.0.0.1:80 or 127.0.0.1 direct

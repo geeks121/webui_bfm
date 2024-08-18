@@ -1,12 +1,25 @@
 <?php
 session_start();
 
-// Redirect to login if not authenticated
-if (!isset($_SESSION['user_id'])) {
-    $_SESSION['redirect_url'] = $_SERVER['REQUEST_URI'];
-    header('Location: login.php');
-    exit;
+require_once '/data/adb/php7/files/www/auth/auth_functions.php';
+
+// If login is disabled, set the current page but do not redirect to login
+if (isset($_SESSION['login_disabled']) && $_SESSION['login_disabled'] === true) {
+    // Login is disabled, handle accordingly
+    // You can show a message or just let the user stay on the page
+    //echo "<p>Login is currently disabled.</p>";
+} else {
+    // Proceed to check if the user is logged in
+    checkUserLogin();
 }
+
+
+// Redirect to login if not authenticated
+//if (!isset($_SESSION['user_id'])) {
+//    $_SESSION['redirect_url'] = $_SERVER['REQUEST_URI'];
+//    header('Location: login.php');
+//    exit;
+//}
 
 // Include credentials file
 $credentials = include 'credentials.php';
