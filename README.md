@@ -1,10 +1,15 @@
-# BOX UI
-
 ![logo](https://github.com/user-attachments/assets/252391a0-9f95-4a8f-8e29-cb0ff071559f)
 
 
-## Overview
 
+<div align="center">
+  <img alt="License" src="https://img.shields.io/github/license/geeks121/webui_bfm?style=for-the-badge">
+  <img alt="Forks" src="https://img.shields.io/github/forks/geeks121/webui_bfm?style=for-the-badge">
+  <img alt="Release" src="https://img.shields.io/github/v/release/geeks121/webui_bfm?style=for-the-badge">
+  <img alt="Downloads" src="https://img.shields.io/github/downloads/geeks121/webui_bfm/total?style=for-the-badge">
+</div>
+
+## Overview
 BOX UI is a web-based interface for managing Box for Android tools. It supports both Magisk and KernelSU modules and provides a comprehensive suite of features to control and monitor your Android device access your device without touch it.
 ## login
 
@@ -28,49 +33,21 @@ BOX UI is a web-based interface for managing Box for Android tools. It supports 
 
 ## Current Version
 
-[Current Release V.1.0.3](https://github.com/geeks121/webui_bfm/releases)
+<div align="center">
+  <img alt="Release" src="https://img.shields.io/github/v/release/geeks121/webui_bfm?style=for-the-badge">
+</div>
+
 
 ## Installation
+
+- install as Magisk or kernelSU module
 
 ### Requirements
 
 - Termux
-- Termux:Boot
-- TTyd
+- Magisk or KernelSU
 
-### Step-by-Step Guide to run TTyd
 
-1. Install Termux and Termux:Boot from the Google Play Store or F-Droid.
-2. Open Termux and run the following command to install TTyd:
-
-    ```sh
-    pkg install ttyd
-    ```
-
-3. Create the `ttyd.sh` script to start TTyd on boot:
-
-    ```sh
-    touch ~/.termux/boot/ttyd.sh
-    ```
-
-4. Add the following content copy and paste to `ttyd.sh`:
-
-    ```sh
-    #!/data/data/com.termux/files/usr/bin/sh
-    termux-wake-lock
-    echo "Running script at boot..."
-    # Your commands go here
-    ttyd -p 3001 -W -t enableTrzsz=true bash
-    termux-wake-unlock
-    ```
-
-5. Make the script executable:
-
-    ```sh
-    chmod +x ~/.termux/boot/ttyd.sh
-    ```
-
-6. Follow the instructions in the BOX UI documentation to set up the webserver and other features.
 
 ## Usage
 
