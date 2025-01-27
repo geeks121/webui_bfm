@@ -1,23 +1,10 @@
 <?php
-
-require_once '/data/adb/php7/files/www/auth/auth_functions.php';
-
-// If login is disabled, set the current page but do not redirect to login
-if (isset($_SESSION['login_disabled']) && $_SESSION['login_disabled'] === true) {
-    // Login is disabled, handle accordingly
-    // You can show a message or just let the user stay on the page
-    //echo "<p>Login is currently disabled.</p>";
-} else {
-    // Proceed to check if the user is logged in
-    checkUserLogin();
-}
-
 //Default Configuration
-$CONFIG = '{"lang":"en","error_reporting":false,"show_hidden":true,"hide_Cols":false,"theme":"dark"}';
+$CONFIG = '{"lang":"en","error_reporting":false,"show_hidden":false,"hide_Cols":false,"theme":"dark"}';
 
 /**
  * H3K | Tiny File Manager V2.5.3
- * @author CCP Programmers
+ * @author Prasath Mani | CCP Programmers
  * @email ccpprogrammers@gmail.com
  * @github https://github.com/prasathmani/tinyfilemanager
  * @link https://tinyfilemanager.github.io
@@ -70,14 +57,15 @@ $edit_files = true;
 // Default timezone for date() and time()
 // Doc - http://php.net/manual/en/timezones.php
 $default_timezone = 'Etc/UTC'; // UTC
+
 // Root path for file manager
 // use absolute path of directory i.e: '/var/www/folder' or $_SERVER['DOCUMENT_ROOT'].'/folder'
-//$root_path = $_SERVER['DOCUMENT_ROOT'].'/data/adb';
+//$root_path = $_SERVER['DOCUMENT_ROOT'];
 $root_path = '/data/adb/';
 
 // Root url for links in file manager.Relative to $http_host. Variants: '', 'path/to/subfolder'
 // Will not working if $root_path will be outside of server document root
-$root_url = '/';
+$root_url = '';
 
 // Server hostname. Can set manually if wrong
 // $_SERVER['HTTP_HOST'].'/folder'
@@ -89,12 +77,6 @@ $iconv_input_encoding = 'UTF-8';
 // date() format for file modification date
 // Doc - https://www.php.net/manual/en/function.date.php
 $datetime_format = 'm/d/Y g:i A';
-
-// Path display mode when viewing file information
-// 'full' => show full path
-// 'relative' => show path relative to root_path
-// 'host' => show path on the host
-$path_display_mode = 'full';
 
 // Allowed file extensions for create and rename files
 // e.g. 'txt,html,css,js'
@@ -165,7 +147,7 @@ $external = array(
     'js-bootstrap' => '<script src="assets/js/bootstrap.bundle.min.js"></script>',
     'js-dropzone' => '<script src="assets/js/dropzone.min.js"></script>',
     'js-jquery' => '<script src="assets/js/jquery-3.6.1.min.js"></script>',
-    'js-jquery-datatables' => '<script src="assets/js/datatables.min.js"></script>',
+    'js-jquery-datatables' => '<script src="assets/js/dataTables.min.js"></script>',
     'js-highlightjs' => '<script src="assets/js/highlight.min.js"></script>',
 );
 
@@ -239,7 +221,7 @@ if (defined('FM_EMBED')) {
         mb_regex_encoding('UTF-8');
     }
 
-    session_cache_limiter('nocache'); // Prevent logout issue after page was cached
+    session_cache_limiter('');
     session_name(FM_SESSION_ID );
     function session_error_handling_function($code, $msg, $file, $line) {
         // Permission denied for default session, try to create a new one
@@ -254,7 +236,7 @@ if (defined('FM_EMBED')) {
     restore_error_handler();
 }
 
-//Generating CSRF Token
+//Genrating CSRF Token
 if (empty($_SESSION['token'])) {
     $_SESSION['token'] = bin2hex(random_bytes(32));
 }
@@ -931,6 +913,7 @@ if (!empty($_FILES) && !FM_READONLY) {
         echo json_encode($response); exit();
     }
 
+    $override_file_name = false;
     $chunkIndex = $_POST['dzchunkindex'];
     $chunkTotal = $_POST['dztotalchunkcount'];
     $fullPathInput = fm_clean_path($_REQUEST['fullpath']);
@@ -968,6 +951,11 @@ if (!empty($_FILES) && !FM_READONLY) {
         $fullPath = $path . '/' . basename($fullPathInput);
         $folder = substr($fullPath, 0, strrpos($fullPath, "/"));
 
+        if(file_exists ($fullPath) && !$override_file_name && !$chunks) {
+            $ext_1 = $ext ? '.'.$ext : '';
+            $fullPath = $path . '/' . basename($fullPathInput, $ext_1) .'_'. date('ymdHis'). $ext_1;
+        }
+
         if (!is_dir($folder)) {
             $old = umask(0);
             mkdir($folder, 0777, true);
@@ -980,12 +968,7 @@ if (!empty($_FILES) && !FM_READONLY) {
                 if ($out) {
                     $in = @fopen($tmp_name, "rb");
                     if ($in) {
-                        if (PHP_VERSION_ID < 80009) {
-                            // workaround https://bugs.php.net/bug.php?id=81145
-                            while (!feof($in)) { fwrite($out, fread($in, 4096)); }
-                        } else {
-                            stream_copy_to_stream($in, $out);
-                        }
+                        while ($buff = fread($in, 4096)) { fwrite($out, $buff); }
                         $response = array (
                             'status'    => 'success',
                             'info' => "file upload successful"
@@ -1013,13 +996,7 @@ if (!empty($_FILES) && !FM_READONLY) {
                 }
 
                 if ($chunkIndex == $chunkTotal - 1) {
-                    if (file_exists ($fullPath)) {
-                        $ext_1 = $ext ? '.'.$ext : '';
-                        $fullPathTarget = $path . '/' . basename($fullPathInput, $ext_1) .'_'. date('ymdHis'). $ext_1;
-                    } else {
-                        $fullPathTarget = $fullPath;
-                    }
-                    rename("{$fullPath}.part", $fullPathTarget);
+                    rename("{$fullPath}.part", $fullPath);
                 }
 
             } else if (move_uploaded_file($tmp_name, $fullPath)) {
@@ -1701,8 +1678,7 @@ if (isset($_GET['view'])) {
         <div class="col-12">
             <p class="break-word"><b><?php echo lng($view_title) ?> "<?php echo fm_enc(fm_convert_win($file)) ?>"</b></p>
             <p class="break-word">
-                <?php $display_path = fm_get_display_path($file_path); ?>
-                <strong><?php echo $display_path['label']; ?>:</strong> <?php echo $display_path['path']; ?><br>
+                <strong>Full path:</strong> <?php echo fm_enc(fm_convert_win($file_path)) ?><br>
                 <strong>File size:</strong> <?php echo ($filesize_raw <= 1000) ? "$filesize_raw bytes" : $filesize; ?><br>
                 <strong>MIME-type:</strong> <?php echo $mime_type ?><br>
                 <?php
@@ -1801,7 +1777,7 @@ if (isset($_GET['view'])) {
             } elseif ($is_image) {
                 // Image content
                 if (in_array($ext, array('gif', 'jpg', 'jpeg', 'png', 'bmp', 'ico', 'svg', 'webp', 'avif'))) {
-                    echo '<p><input type="checkbox" id="preview-img-zoomCheck"><label for="preview-img-zoomCheck"><img src="' . fm_enc($file_url) . '" alt="image" class="preview-img"></label></p>';
+                    echo '<p><img src="' . fm_enc($file_url) . '" alt="image" class="preview-img-container" class="preview-img"></p>';
                 }
             } elseif ($is_audio) {
                 // Audio content
@@ -1961,8 +1937,7 @@ if (isset($_GET['chmod']) && !FM_READONLY && !FM_IS_WIN) {
             </h6>
             <div class="card-body">
                 <p class="card-text">
-                    <?php $display_path = fm_get_display_path($file_path); ?>
-                    <?php echo $display_path['label']; ?>: <?php echo $display_path['path']; ?><br>
+                    Full path: <?php echo $file_path ?><br>
                 </p>
                 <form action="" method="post">
                     <input type="hidden" name="p" value="<?php echo fm_enc(FM_PATH) ?>">
@@ -2075,12 +2050,6 @@ $tableTheme = (FM_THEME == "dark") ? "text-white bg-dark table-dark" : "bg-white
                 if (function_exists('posix_getpwuid') && function_exists('posix_getgrgid')) {
                     $owner = posix_getpwuid(fileowner($path . '/' . $f));
                     $group = posix_getgrgid(filegroup($path . '/' . $f));
-                    if ($owner === false) {
-                        $owner = array('name' => '?');
-                    }
-                    if ($group === false) {
-                        $group = array('name' => '?');
-                    }
                 } else {
                     $owner = array('name' => '?');
                     $group = array('name' => '?');
@@ -2134,12 +2103,6 @@ $tableTheme = (FM_THEME == "dark") ? "text-white bg-dark table-dark" : "bg-white
                 if (function_exists('posix_getpwuid') && function_exists('posix_getgrgid')) {
                     $owner = posix_getpwuid(fileowner($path . '/' . $f));
                     $group = posix_getgrgid(filegroup($path . '/' . $f));
-                    if ($owner === false) {
-                        $owner = array('name' => '?');
-                    }
-                    if ($group === false) {
-                        $group = array('name' => '?');
-                    }
                 } else {
                     $owner = array('name' => '?');
                     $group = array('name' => '?');
@@ -2531,30 +2494,6 @@ function fm_get_parent_path($path)
         return '';
     }
     return false;
-}
-
-function fm_get_display_path($file_path)
-{
-    global $path_display_mode, $root_path, $root_url;
-    switch ($path_display_mode) {
-        case 'relative':
-            return array(
-                'label' => 'Path',
-                'path' => fm_enc(fm_convert_win(str_replace($root_path, '', $file_path)))
-            );
-        case 'host':
-            $relative_path = str_replace($root_path, '', $file_path);
-            return array(
-                'label' => 'Host Path',
-                'path' => fm_enc(fm_convert_win('/' . $root_url . '/' . ltrim(str_replace('\\', '/', $relative_path), '/')))
-            );
-        case 'full':
-        default:
-            return array(
-                'label' => 'Full Path',
-                'path' => fm_enc(fm_convert_win($file_path))
-            );
-    }
 }
 
 /**
@@ -3765,9 +3704,7 @@ $isStickyNavBar = $sticky_navbar ? 'navbar-fixed' : 'navbar-normal';
         .message.ok { border-color:green;color:green  }
         .message.error { border-color:red;color:red  }
         .message.alert { border-color:orange;color:orange  }
-        .preview-img { max-width:100%;max-height:80vh;background:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAAAKklEQVR42mL5//8/Azbw+PFjrOJMDCSCUQ3EABZc4S0rKzsaSvTTABBgAMyfCMsY4B9iAAAAAElFTkSuQmCC);cursor:zoom-in }
-        input#preview-img-zoomCheck[type=checkbox] { display:none }
-        input#preview-img-zoomCheck[type=checkbox]:checked ~ label > img { max-width:none;max-height:none;cursor:zoom-out }
+        .preview-img { max-width:100%;max-height:80vh;background:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAAAKklEQVR42mL5//8/Azbw+PFjrOJMDCSCUQ3EABZc4S0rKzsaSvTTABBgAMyfCMsY4B9iAAAAAElFTkSuQmCC) }
         .inline-actions > a > i { font-size:1em;margin-left:5px;background:#3785c1;color:#fff;padding:3px 4px;border-radius:3px; }
         .preview-video { position:relative;max-width:100%;height:0;padding-bottom:62.5%;margin-bottom:10px  }
         .preview-video video { position:absolute;width:100%;height:100%;left:0;top:0;background:#000  }
@@ -4165,7 +4102,7 @@ $isStickyNavBar = $sticky_navbar ? 'navbar-fixed' : 'navbar-normal';
     <script>
         var editor = ace.edit("editor");
         editor.getSession().setMode( {path:"ace/mode/<?php echo $ext; ?>", inline:true} );
-        //editor.setTheme("ace/theme/twilight"); //Dark Theme
+        editor.setTheme("ace/theme/terminal"); //Dark Theme
         editor.setShowPrintMargin(false); // Hide the vertical ruler
         function ace_commend (cmd) { editor.commands.exec(cmd, editor); }
         editor.commands.addCommands([{

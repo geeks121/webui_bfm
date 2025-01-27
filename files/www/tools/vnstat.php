@@ -1,85 +1,138 @@
 <?php
-// Start vnstat daemon in the background using nohup
-//shell_exec('nohup sudo vnstatd -n > /dev/null 2>&1 &');
+// Tentukan path ke binari Termux
+$tmuxBin = "/data/data/com.termux/files/usr/bin/";
+$vnstatBin = "/data/data/com.termux/files/usr/bin/vnstat";
+$vnstatdBin = "/data/data/com.termux/files/usr/bin/vnstatd";
 
-// Delay for daemon to start
-sleep(2);
+// Jalankan daemon vnstat di latar belakang jika belum berjalan
+if (!shell_exec('pidof vnstatd')) {
+    shell_exec('nohup ' . $tmuxBin . 'sudo ' . $vnstatdBin . ' -n > /dev/null 2>&1 &');
+    sleep(2); // Tunggu daemon berjalan
+}
 
-// Run vnstat for daily and monthly usage with root
-$vnstatDailyOutput = shell_exec('su -c /data/data/com.termux/files/usr/bin/vnstat -d -i rmnet_data1 2>&1');
-$vnstatMonthlyOutput = shell_exec('su -c /data/data/com.termux/files/usr/bin/vnstat -m -i rmnet_data1 2>&1');
+// Jalankan vnstat untuk penggunaan harian
+$vnstatDailyOutput = shell_exec($tmuxBin . 'sudo ' . $vnstatBin . ' -d 2>&1');
 
-// Function to parse vnstat output and extract required data
-function parseVnstatOutput($output, $type) {
-    $lines = explode("\n", $output);
-    $result = '';
+// Fungsi untuk mem-parsing output vnstat harian
+function parseDataHarian($output) {
+    $baris = explode("\n", $output);
+    $data = [];
 
-    foreach ($lines as $line) {
-        // Daily usage parsing
-        if ($type === 'daily') {
-            if (preg_match('/(\d{4}-\d{2}-\d{2})\s+([\d.]+ \w+)\s+\|\s+([\d.]+ \w+)\s+\|\s+([\d.]+ \w+)/', $line, $matches)) {
-                $result .= '<tr>';
-                $result .= '<td>' . htmlspecialchars($matches[1]) . '</td>';
-                $result .= '<td>' . htmlspecialchars($matches[2]) . '</td>';
-                $result .= '<td>' . htmlspecialchars($matches[3]) . '</td>';
-                $result .= '<td>' . htmlspecialchars($matches[4]) . '</td>';
-                $result .= '</tr>';
-            }
-        }
-
-        // Monthly usage parsing
-        if ($type === 'monthly') {
-            if (preg_match('/(\d{4}-\d{2})\s+([\d.]+ \w+)\s+\|\s+([\d.]+ \w+)\s+\|\s+([\d.]+ \w+)/', $line, $matches)) {
-                $result .= '<tr>';
-                $result .= '<td>' . htmlspecialchars($matches[1]) . '</td>';
-                $result .= '<td>' . htmlspecialchars($matches[2]) . '</td>';
-                $result .= '<td>' . htmlspecialchars($matches[3]) . '</td>';
-                $result .= '<td>' . htmlspecialchars($matches[4]) . '</td>';
-                $result .= '</tr>';
-            }
+    foreach ($baris as $line) {
+        if (preg_match('/(\d{4}-\d{2}-\d{2})\s+([\d.]+) ([KMG]iB)\s+\|\s+([\d.]+) ([KMG]iB)/', $line, $cocok)) {
+            $tanggal = $cocok[1];
+            $download = konversiKeGiB($cocok[2], $cocok[3]);
+            $upload = konversiKeGiB($cocok[4], $cocok[5]);
+            $data[$tanggal] = ['download' => $download, 'upload' => $upload];
         }
     }
 
-    return $result;
+    return $data;
 }
 
-// Parse the output for daily and monthly usage
-$dailyUsage = parseVnstatOutput($vnstatDailyOutput, 'daily');
-$monthlyUsage = parseVnstatOutput($vnstatMonthlyOutput, 'monthly');
+// Fungsi pembantu untuk mengonversi unit (GiB, MiB, KiB) ke GiB
+function konversiKeGiB($nilai, $unit) {
+    $unit = strtolower($unit);
+    switch ($unit) {
+        case 'kib': return $nilai / (1024 * 1024);
+        case 'mib': return $nilai / 1024;
+        case 'gib': return $nilai;
+        default: return 0;
+    }
+}
 
-// HTML for displaying the results
+// Fungsi untuk mengurutkan data berdasarkan tanggal terbaru ke terlama
+function urutkanDataHarian($data) {
+    uksort($data, function ($a, $b) {
+        return strtotime($b) - strtotime($a); // Mengurutkan dari tanggal terbaru ke terlama
+    });
+    return $data;
+}
+
+// Mengelompokkan data berdasarkan minggu
+function kelompokkanPerMinggu($data) {
+    $dataMingguan = [];
+    foreach ($data as $tanggal => $penggunaan) {
+        $nomorMinggu = date('W', strtotime($tanggal));
+        $tahun = date('Y', strtotime($tanggal));
+        $kunci = "$tahun-Minggu $nomorMinggu";
+
+        if (!isset($dataMingguan[$kunci])) {
+            $dataMingguan[$kunci] = ['download' => 0, 'upload' => 0, 'harian' => []];
+        }
+        $dataMingguan[$kunci]['download'] += $penggunaan['download'];
+        $dataMingguan[$kunci]['upload'] += $penggunaan['upload'];
+        $dataMingguan[$kunci]['harian'][$tanggal] = $penggunaan;
+    }
+    return $dataMingguan;
+}
+
+$dataHarian = parseDataHarian($vnstatDailyOutput);
+$dataHarian = urutkanDataHarian($dataHarian); // Urutkan data dari tanggal terbaru
+$dataMingguan = kelompokkanPerMinggu($dataHarian);
+
+// Ambil data harian bulan ini
+$labels = [];
+$downloadData = [];
+$uploadData = [];
+foreach ($dataHarian as $tanggal => $penggunaan) {
+    if (strpos($tanggal, date('Y-m')) === 0) { // Pastikan hanya data bulan ini
+        $labels[] = $tanggal;
+        $downloadData[] = $penggunaan['download'];
+        $uploadData[] = $penggunaan['upload'];
+    }
+}
 ?>
+
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vnstat Usage</title>
+    <title>Penggunaan vnStat</title>
     <style>
         body {
-            background-color: #2c2c2c;
-            color: #f1f1f1;
+            background-color: #1e1e1e;
+            color: #ffffff;
             font-family: Arial, sans-serif;
-            padding: 20px;
-        }
-        .output-box {
-            background-color: #333;
-            border: 1px solid #444;
-            padding: 15px;
-            margin-bottom: 20px;
-            border-radius: 5px;
-            overflow-x: auto; /* Enables horizontal scrolling if table is too wide */
+            margin: 0;
+            padding: 10px;
         }
         h2 {
             color: #ffa500;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+        .kotak-ringkasan {
+            display: inline-block;
+            width: 80px;
+            padding: 15px;
+            margin: 12px;
+            text-align: center;
+            background-color: #444;
+            color: #ffa500;
+            border-radius: 10px;
+            font-size: 14px;
+        }
+        .kotak-ringkasan span {
+            display: block;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .kotak-output {
+            background-color: #292929;
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 20px;
         }
         table {
             width: 100%;
             border-collapse: collapse;
+            font-size: 12px;
         }
         th, td {
-            padding: 12px;
-            text-align: center; /* Center-align text in headers and cells */
+            padding: 8px;
+            text-align: center;
             border: 1px solid #444;
         }
         th {
@@ -93,40 +146,98 @@ $monthlyUsage = parseVnstatOutput($vnstatMonthlyOutput, 'monthly');
             background-color: #333;
         }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-    <h2>Daily Usage</h2>
-    <div class="output-box">
+    <!-- Kotak ringkasan -->
+    <div class="kotak-ringkasan">
+        <span><?php echo number_format(array_sum(array_column($dataHarian, 'download')), 2); ?> GB</span>
+        Bulan Ini
+    </div>
+    <div class="kotak-ringkasan">
+        <span><?php echo number_format(reset($dataHarian)['download'], 2); ?> GB</span>
+        Hari Ini
+    </div>
+    <div class="kotak-ringkasan">
+        <span><?php echo number_format(next($dataHarian)['download'], 2); ?> GB</span>
+        Kemarin
+    </div>
+
+    <!-- Diagram Penggunaan Harian Bulan Ini -->
+    <div class="kotak-output">
+        <h2>Diagram Penggunaan Harian Bulan Ini</h2>
+        <canvas id="dailyUsageChart"></canvas>
+    </div>
+
+    <!-- Tabel penggunaan mingguan -->
+    <h2>Tabel Penggunaan Mingguan</h2>
+    <div class="kotak-output">
         <table>
             <thead>
                 <tr>
-                    <th>Day</th>
-                    <th>RX</th>
-                    <th>TX</th>
-                    <th>Total</th>
+                    <th>Minggu</th>
+                    <th>Total Unduhan</th>
+                    <th>Total Unggahan</th>
                 </tr>
             </thead>
             <tbody>
-                <?php echo $dailyUsage; ?>
+                <?php
+                foreach ($dataMingguan as $minggu => $penggunaan) {
+                    echo "<tr><td colspan='3'><strong>$minggu</strong></td></tr>";
+                    echo "<tr><td>Total</td><td>" . number_format($penggunaan['download'], 2) . " GB</td><td>" . number_format($penggunaan['upload'], 2) . " GB</td></tr>";
+                    foreach ($penggunaan['harian'] as $hari => $penggunaanHarian) {
+                        echo "<tr><td>$hari</td><td>" . number_format($penggunaanHarian['download'], 2) . " GB</td><td>" . number_format($penggunaanHarian['upload'], 2) . " GB</td></tr>";
+                    }
+                }
+                ?>
             </tbody>
         </table>
     </div>
 
-    <h2>Monthly Usage</h2>
-    <div class="output-box">
-        <table>
-            <thead>
-                <tr>
-                    <th>Month</th>
-                    <th>RX</th>
-                    <th>TX</th>
-                    <th>Total</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php echo $monthlyUsage; ?>
-            </tbody>
-        </table>
-    </div>
+    <script>
+        // Mendapatkan konteks canvas
+        var ctx = document.getElementById('dailyUsageChart').getContext('2d');
+
+        // Membuat diagram
+        var dailyUsageChart = new Chart(ctx, {
+            type: 'line', // Jenis diagram: garis
+            data: {
+                labels: <?php echo json_encode($labels); ?>, // Label (tanggal)
+                datasets: [{
+                    label: 'Unduhan (GB)',
+                    data: <?php echo json_encode($downloadData); ?>, // Data unduhan
+                    borderColor: '#FFA500',
+                    backgroundColor: 'rgba(255, 165, 0, 0.2)',
+                    fill: true,
+                    tension: 0.4
+                }, {
+                    label: 'Unggahan (GB)',
+                    data: <?php echo json_encode($uploadData); ?>, // Data unggahan
+                    borderColor: '#00BFFF',
+                    backgroundColor: 'rgba(0, 191, 255, 0.2)',
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Penggunaan (GB)'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Tanggal'
+                        }
+                    }
+                }
+            }
+        });
+    </script>
 </body>
 </html>

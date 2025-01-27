@@ -2,6 +2,7 @@
 $clashlogs = "/data/adb/box/run/runs.log";
 $pid = "/data/adb/box/run/box.pid";
 $moduledir = "../modules/box_for_magisk";
+$iniFile = '/data/adb/box/settings.ini';
 
 session_start([
   'cookie_lifetime' => 31536000, // 1 year
@@ -15,6 +16,38 @@ if (LOGIN_ENABLED && !isset($_SESSION['user_id'])) {
     header('Location: /auth/login.php');
     exit;
 }
+
+// Check if the file exists and read the parameter clash config
+if (file_exists($iniFile)) {
+    // Open the file and read it line by line
+    $lines = file($iniFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    
+    // Loop through each line to find the name_clash_config setting
+    foreach ($lines as $line) {
+        if (strpos($line, 'name_clash_config=') === 0) {
+            // Extract the value inside the quotes after the '=' symbol
+            $name_clash_config = trim(str_replace(['name_clash_config=', '"'], '', $line));
+            break; // Stop searching once we find the parameter
+        }
+    }
+}
+
+// Check if the file exists and read the parameter Sing config
+if (file_exists($iniFile)) {
+    // Open the file and read it line by line
+    $lines = file($iniFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    
+    // Loop through each line to find the name_clash_config setting
+    foreach ($lines as $line) {
+        if (strpos($line, 'name_sing_config=') === 0) {
+            // Extract the value inside the quotes after the '=' symbol
+            $name_sing_config = trim(str_replace(['name_sing_config=', '"'], '', $line));
+            break; // Stop searching once we find the parameter
+        }
+    }
+}
+
+
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $action = $_REQUEST['actionButton'];
@@ -111,11 +144,27 @@ $host = $x[0];
           <div class="sidebar-content">
             <ul class="nav nav-secondary">
               <li class="nav-item">
-                <a href="#" onclick="loadIframe('http://<?php echo $host; ?>:9090/ui/?hostname=<?php echo $host; ?>#/proxies')">
+                <li class="nav-item">
+                <a data-bs-toggle="collapse" href="#DASHBOARD">
                   <i class="fas fa-home"></i>
                   <p>Clash Dashboard</p>
-                  <span class="badge badge-secondary">1</span>
+                  <span class="caret"></span>
                 </a>
+                <div class="collapse" id="DASHBOARD">
+                  <ul class="nav nav-collapse">
+                    <li>
+                      <a href="#" onclick="loadIframe('http://<?php echo $host; ?>:9090/ui/?hostname=<?php echo $host; ?>&port=9090')">
+                        <span class="sub-item">Default</span>
+                      </a>
+                    </li>
+                    <li>
+                      <a href="#" onclick="loadIframe('http://<?php echo $host; ?>/zashboard/ui#/setup?hostname=<?php echo $host; ?>&port=9090')">
+                        <span class="sub-item">zashboard</span>
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              </li>
               </li>
             <li class="nav-item">
               <a href="#" onclick="loadIframe('/tools/sysinfo.php')">
@@ -124,8 +173,6 @@ $host = $x[0];
                   <span class="badge badge-secondary"></span>
               </a>
             </li>
-                      
-
               <li class="nav-section">
                 <span class="sidebar-mini-icon">
                   <i class="fa fa-ellipsis-h"></i>
@@ -140,18 +187,32 @@ $host = $x[0];
                 </a>
               </li>
               <li class="nav-item">
-                <a href="#" onclick="loadIframe('/tiny/index.php')">
-                  <i class="fas fa-archive"></i>
-                  <p>TinyFM</p>
-                  <span class="badge badge-secondary"></span>
-                </a>
-              </li>
-              <li class="nav-item">
                 <a href="#" onclick="loadIframe('/tools/boxsettings.php')">
                   <i class="fas fa-cube"></i>
                   <p>BOX SET</p>
                   <span class="badge badge-secondary"></span>
                 </a>
+              </li>
+              <li class="nav-item">
+                <a data-bs-toggle="collapse" href="#storage">
+                  <i class="fas fa-archive"></i>
+                  <p>File Manager</p>
+                  <span class="caret"></span>
+                </a>
+                <div class="collapse" id="storage">
+                  <ul class="nav nav-collapse">
+                    <li>
+                      <a href="#" onclick="loadIframe('/tiny/index.php')">
+                        <span class="sub-item">TINY FM</span>
+                      </a>
+                    </li>
+                    <li>
+                      <a href="#" onclick="loadIframe('/tiny/sdcard.php')">
+                        <span class="sub-item">INTERNAL STORAGE</span>
+                      </a>
+                    </li>
+                  </ul>
+                </div>
               </li>
               <li class="nav-item">
                 <a data-bs-toggle="collapse" href="#bfr">
@@ -162,11 +223,21 @@ $host = $x[0];
                 <div class="collapse" id="bfr">
                   <ul class="nav nav-collapse">
                     <li>
-                      <a href="#" onclick="loadIframe('http://<?php echo $host; ?>/tiny/index.php?p=box%2Fclash&edit=config.yaml&env=ace')">
-                        <span class="sub-item">config.yaml editor</span>
+                      <a href="#" onclick="loadIframe('http://<?php echo $host; ?>/tiny/index.php?p=box%2Fclash&edit=<?php echo urlencode($name_clash_config); ?>&env=ace')">
+                        <span class="sub-item">config.yaml</span>
+                      </a>
+                    </li>
+                    <li>
+                      <a href="#" onclick="loadIframe('http://<?php echo $host; ?>/tiny/index.php?p=box%2Fsing-box&edit=<?php echo urlencode($name_sing_config); ?>&env=ace')">
+                        <span class="sub-item">config.json</span>
                       </a>
                     </li>
 
+                    <li>
+                      <a href="#" onclick="loadIframe('/tools/default-config.php')">
+                        <span class="sub-item">Change config</span>
+                      </a>
+                    </li>
                     <li>
                       <a href="#" onclick="loadIframe('/tools/executed.php')">
                         <span class="sub-item">Command</span>
