@@ -63,14 +63,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $selectedYaml = $_POST['yaml_file'];
         updateSettingsIni_clash($settingsFile, $selectedYaml);
         // Redirect to prevent form resubmission
-        header("Location: /tools/box-yaml.php");
+        header("Location: /tools/default-config.php");
         exit();
     }
     if (isset($_POST['json_file'])) {
         $selectedJson = $_POST['json_file'];
         updateSettingsIni_sing($settingsFile, $selectedJson);
         // Redirect to prevent form resubmission
-        header("Location: /tools/box-yaml.php");
+        header("Location: /tools/default-config.php");
         exit();
     }
 }
