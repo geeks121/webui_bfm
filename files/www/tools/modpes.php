@@ -1,73 +1,207 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
     <title>Airplane BOX UI</title>
-    <!-- Materialize CSS -->
-    <link rel="stylesheet" href="../auth/css/materialize.min.css" />
-    <!-- Materialize Icons -->
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <style>
+        :root {
+            --bg-color: #ffffff;
+            --text-color: #333333;
+            --card-bg: #f5f5f5;
+            --hover-color: #e0e0e0;
+            --header-height: 60px;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #121212;
+            --text-color: #ffffff;
+            --card-bg: #1e1e1e;
+            --hover-color: #2d2d2d;
+        }
+
         body {
-            background-color: #121212; /* Dark mode background color */
-            color: #ffffff; /* White text color */
-            display: flex;
-            justify-content: center; /* Center horizontally */
-            align-items: center; /* Center vertically */
-            margin: 0; /* Remove default body margin */
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            transition: all 0.3s ease;
+            min-height: 100vh;
+            padding-top: var(--header-height);
         }
+
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: var(--header-height);
+            background-color: var(--card-bg);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            z-index: 1000;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 500;
+            color: var(--text-color);
+        }
+
+        .theme-toggle {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 10px;
+            border-radius: 50%;
+            transition: background-color 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .theme-toggle:hover {
+            background-color: var(--hover-color);
+        }
+
+        .theme-icon {
+            font-size: 24px;
+            color: var(--text-color);
+        }
+
         .container {
-            margin-top: 20px;
+            padding: 20px;
+            max-width: 1000px;
+            margin: 0 auto;
         }
+
         .card {
-            background-color: #1e1e1e; /* Dark mode card background color */
-            color: #ffffff; /* White text color */
-            display: flex;
-            justify-content: center; /* Center horizontally */
-            align-items: center; /* Center vertically */
-            margin: 0; /* Remove default body margin */
+            background-color: var(--card-bg);
+            border-radius: 15px;
+            padding: 30px;
+            margin: 30px 0;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
-        .btn {
-            margin: 10px;
-            width: 100%; /* Make button width responsive */
-            max-width: 300px; /* Max width for larger screens */
-            text-align: center; /* Center text inside the button */
-            display: flex; /* Use flex to align text within the button */
-            justify-content: center; /* Center text horizontally inside the button */
-            align-items: center; /* Center text vertically inside the button */
+
+        .title {
+            font-size: 2.8rem;
+            text-align: center;
+            margin: 20px 0 40px;
+            font-weight: 500;
+            color: var(--text-color);
         }
+
         .checkbox-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 25px 0;
+        }
+
+        .checkbox-wrapper {
             display: flex;
-            flex-wrap: wrap;
+            align-items: center;
+            padding: 15px;
+            border-radius: 12px;
+            background-color: var(--hover-color);
+            transition: transform 0.2s;
+        }
+
+        .checkbox-wrapper:hover {
+            transform: translateY(-2px);
+        }
+
+        [type="checkbox"] + span {
+            color: var(--text-color);
+            padding-left: 35px;
+            font-size: 1.1rem;
+        }
+
+        .btn {
+            margin: 15px;
+            border-radius: 12px;
+            text-transform: none;
+            font-weight: 500;
+            font-size: 1.1rem;
+            height: 48px;
+            line-height: 48px;
+            padding: 0 30px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
             gap: 10px;
         }
-        .checkbox-group label {
-            width: auto; /* Allow checkbox group labels to have automatic width */
-            color: #ffffff; /* White text color */
+
+        .btn i {
+            font-size: 20px;
         }
+
+        .section-title {
+            font-size: 1.8rem;
+            margin: 30px 0 20px;
+            font-weight: 500;
+            color: var(--text-color);
+        }
+
+        .success-message {
+            color: #4CAF50;
+            text-align: center;
+            margin: 15px 0;
+            padding: 15px;
+            border-radius: 12px;
+            background-color: rgba(76, 175, 80, 0.1);
+            font-size: 1.1rem;
+        }
+
         @media (max-width: 600px) {
-            .checkbox-group label {
-                width: 50%;
+            .title {
+                font-size: 2rem;
+                margin: 15px 0 30px;
             }
-        }
-        @media (max-width: 400px) {
-            .checkbox-group label {
+            
+            .btn {
                 width: 100%;
+                margin: 10px 0;
+                height: 44px;
+                line-height: 44px;
+                font-size: 1rem;
             }
-        }
-        .input-field select {
-            background-color: #333333; /* Dark mode background color for dropdown */
-            color: #ffffff; /* White text color for dropdown */
-        }
-        .input-field select option {
-            color: #000000; /* Black text color for dropdown options */
-        }
-        .centered {
-            text-align: center; /* Center text */
+
+            .checkbox-group {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .section-title {
+                font-size: 1.5rem;
+                margin: 25px 0 15px;
+            }
+
+            .card {
+                padding: 20px;
+                margin: 20px 0;
+            }
+
+            .checkbox-wrapper {
+                padding: 12px;
+            }
+
+            [type="checkbox"] + span {
+                font-size: 1rem;
+            }
         }
     </style>
 </head>
-<body>
+<body <?php echo isset($_COOKIE['theme']) && $_COOKIE['theme'] === 'dark' ? 'data-theme="dark"' : ''; ?>>
+    <header class="header">
+        <div class="logo">Airplane BOX UI</div>
+        <button class="theme-toggle" onclick="toggleTheme()">
+            <i class="material-icons theme-icon" id="theme-icon">light_mode</i>
+        </button>
+    </header>
+
     <div class="container">
         <?php
         // Initialize variables for pre-checking
@@ -184,82 +318,102 @@
         }
         ?>
 
-        <h1 class="centered">Airplane BOX UI</h1>
         <div class="card">
-            <div class="card-content">
-                <form action="" method="post">
-                    <h5>Select Radios to Keep On while airplane mode on:</h5>
-                    <div class="checkbox-group">
-                        <!--<label>
-                            <input type="checkbox" name="wifi" <?php echo $checked_wifi ? 'checked' : ''; ?> />
-                            <span>WiFi</span>
-                        </label>-->
+            <form action="" method="post">
+                <h2 class="section-title">Select radios to keep on while airplane mode on :</h2>
+                <div class="checkbox-group">
+                    <div class="checkbox-wrapper">
                         <label>
                             <input type="checkbox" name="cell" <?php echo $checked_cell ? 'checked' : ''; ?> />
                             <span>Cell</span>
                         </label>
+                    </div>
+                    <div class="checkbox-wrapper">
                         <label>
                             <input type="checkbox" name="bluetooth" <?php echo $checked_bluetooth ? 'checked' : ''; ?> />
                             <span>Bluetooth</span>
                         </label>
-                        <!--<label>
-                            <input type="checkbox" name="nfc" <?php echo $checked_nfc ? 'checked' : ''; ?> />
-                            <span>NFC</span>
-                        </label>-->
-                        <!--<label>
-                            <input type="checkbox" name="wimax" <?php echo $checked_wimax ? 'checked' : ''; ?> />
-                            <span>WiMAX</span>
-                        </label>-->
                     </div>
+                </div>
 
-                    <h5>Keep Hotspot Network Enable ?:</h5>
-                    <div class="checkbox-group">
-                        <!--<label>
-                            <input type="checkbox" name="network_choice" value="wifi" <?php echo $network_choice === 'wifi' ? 'checked' : ''; ?> />
-                            <span>WiFi Only</span>
-                        </label>-->
+                <h2 class="section-title">Keep hotspot network enable? :</h2>
+                <div class="checkbox-group">
+                    <div class="checkbox-wrapper">
                         <label>
                             <input type="checkbox" name="network_choice" value="hotspot" <?php echo $network_choice === 'hotspot' ? 'checked' : ''; ?> />
                             <span>Hotspot Only</span>
                         </label>
                     </div>
+                </div>
 
-                    <div class="centered">
-                        <button type="submit" name="action" value="enable_airplane_mode" class="btn green">
-                            <i class="material-icons left">flight_takeoff</i>Enable Airplane Mode
-                        </button>
-                        <button type="submit" name="action" value="disable_airplane_mode" class="btn red">
-                            <i class="material-icons left">flight_land</i>Disable Airplane Mode
-                        </button>
-                    </div>
-                </form>
-                <form action="" method="post">
-                    <h5>Update Radios Individually:</h5>
-                    <div class="checkbox-group">
+                <div class="center-align">
+                    <button type="submit" name="action" value="enable_airplane_mode" class="btn green waves-effect waves-light">
+                        <i class="material-icons">flight_takeoff</i>
+                        Enable Airplane Mode
+                    </button>
+                    <button type="submit" name="action" value="disable_airplane_mode" class="btn red waves-effect waves-light">
+                        <i class="material-icons">flight_land</i>
+                        Disable Airplane Mode
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <div class="card">
+            <form action="" method="post">
+                <h2 class="section-title">Update radios individually :</h2>
+                <div class="checkbox-group">
+                    <div class="checkbox-wrapper">
                         <label>
                             <input type="checkbox" name="bluetooth_control" <?php echo shell_exec("su -c 'svc bluetooth status'") === 'enabled' ? 'checked' : ''; ?> />
                             <span>Bluetooth</span>
                         </label>
+                    </div>
+                    <div class="checkbox-wrapper">
                         <label>
                             <input type="checkbox" name="wifi_control" <?php echo shell_exec("su -c 'svc wifi status'") === 'enabled' ? 'checked' : ''; ?> />
                             <span>WiFi</span>
                         </label>
-                       <!-- <label>
-                            <input type="checkbox" name="nfc_control" <?php echo shell_exec("su -c 'svc nfc status'") === 'enabled' ? 'checked' : ''; ?> />
-                            <span>NFC</span>
-                        </label>-->
                     </div>
-                    <div class="centered">
-                        <button type="submit" name="action" value="update_radios" class="btn blue">
-                            <i class="material-icons left">settings</i>Update Radios
-                        </button>
-                    </div>
-                </form>
-            </div>
+                </div>
+                <div class="center-align">
+                    <button type="submit" name="action" value="update_radios" class="btn blue waves-effect waves-light">
+                        <i class="material-icons">settings</i>
+                        Update Radios
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 
-    <!-- Materialize JavaScript -->
-    <script src="../auth/js/materialize.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script>
+        function toggleTheme() {
+            const body = document.body;
+            const icon = document.getElementById('theme-icon');
+            
+            if (body.getAttribute('data-theme') === 'dark') {
+                body.removeAttribute('data-theme');
+                icon.textContent = 'light_mode';
+                document.cookie = "theme=light; path=/; max-age=31536000";
+            } else {
+                body.setAttribute('data-theme', 'dark');
+                icon.textContent = 'dark_mode';
+                document.cookie = "theme=dark; path=/; max-age=31536000";
+            }
+        }
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            const theme = document.cookie.split('; ').find(row => row.startsWith('theme='))?.split('=')[1] || 'light';
+            const icon = document.getElementById('theme-icon');
+            
+            if (theme === 'dark') {
+                document.body.setAttribute('data-theme', 'dark');
+                icon.textContent = 'dark_mode';
+            } else {
+                icon.textContent = 'light_mode';
+            }
+        });
+    </script>
 </body>
 </html>
