@@ -98,162 +98,437 @@ $currentMessages = array_slice($smsMessages, $offset, $itemsPerPage);
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>SIMPLE SMS VIEWER</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern SMS Viewer</title>
     <style>
-        body {
-            font-family: 'Roboto', sans-serif;
-            background-color: #f5f5f5;
-            color: #000;
+        * {
             margin: 0;
             padding: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            transition: background-color 0.3s, color 0.3s;
-        }
-        .dark-mode {
-            background-color: #121212;
-            color: #ffffff;
-        }
-        .container {
-            max-width: 600px;
-            width: 100%;
-            background-color: #fff;
-            margin: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            padding: 20px;
             box-sizing: border-box;
-            transition: background-color 0.3s, color 0.3s;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
         }
-        .dark-mode .container {
-            background-color: #333;
+
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --bg-light: #f8fafc;
+            --bg-dark: #0a0c10;
+            --text-dark: #1e293b;
+            --text-light: #f8fafc;
+            --card-light: #ffffff;
+            --card-dark: #1e293b;
+            --border-light: #e2e8f0;
+            --border-dark: #334155;
         }
+
+        body {
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+            transition: background-color 0.3s ease;
+        }
+
+        body.dark {
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+        }
+
+        /* Base styles */
+        .container {
+            width: 95%;
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
         .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
+            margin-bottom: 1rem;
+            padding: 2rem;
+            background: var(--card-light);
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
         }
-        .message-list {
-            list-style-type: none;
-            padding: 0;
-            margin: 0;
+
+        .dark .header {
+            background: var(--card-dark);
         }
-        .message-item {
-            background-color: #fafafa;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            padding: 10px;
-            margin-bottom: 10px;
-            transition: background-color 0.3s, color 0.3s;
+
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
         }
-        .dark-mode .message-item {
-            background-color: #444;
-            border-color: #555;
+
+        .filters {
+            display: grid;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            padding: 1.5rem;
+            background: var(--card-light);
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
         }
-        .message-item:hover {
-            background-color: #f0f0f0;
+
+        .dark .filters {
+            background: var(--card-dark);
         }
-        .dark-mode .message-item:hover {
-            background-color: #555;
-        }
-        .message-item .sender {
-            font-weight: bold;
-            color: #1a73e8;
-        }
-        .dark-mode .message-item .sender {
-            color: #82b1ff;
-        }
-        .message-item .message-body {
-            margin-top: 5px;
-        }
-        .message-item .date {
-            font-size: 0.8em;
-            color: #888;
-        }
-        .dark-mode .message-item .date {
-            color: #bbb;
-        }
+
         .form-group {
-            margin-bottom: 20px;
+            display: grid;
+            gap: 0.5rem;
         }
+
         .form-group label {
-            display: block;
-            margin-bottom: 5px;
+            font-weight: 500;
         }
-        .form-group select,
-        .form-group input[type="text"] {
-            width: 100%;
-            padding: 8px;
-            font-size: 1em;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            box-sizing: border-box;
+
+        select, input[type="text"] {
+            padding: 0.75rem;
+            border: 1px solid var(--border-light);
+            border-radius: 0.5rem;
+            background: var(--bg-light);
+            color: var(--text-dark);
+            font-size: 1rem;
+            transition: all 0.2s ease;
         }
-        .form-group button {
-            padding: 8px 16px;
-            font-size: 1em;
-            background-color: #1a73e8;
-            color: #fff;
+
+        .dark select, .dark input[type="text"] {
+            background: var(--bg-dark);
+            border-color: var(--border-dark);
+            color: var(--text-light);
+        }
+
+        button {
+            padding: 0.75rem 1.5rem;
+            background: var(--primary);
+            color: white;
             border: none;
-            border-radius: 4px;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        button:hover {
+            background: var(--primary-dark);
+        }
+
+        .message-list {
+            display: grid;
+            gap: 1rem;
+            list-style: none;
+        }
+
+        .message {
+            padding: 1.3rem;
+            background: var(--card-light);
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            transition: transform 0.2s ease;
+        }
+
+        .dark .message {
+            background: var(--card-dark);
+        }
+
+        .message:hover {
+            transform: translateY(-2px);
+        }
+        
+        .message-sender {
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+            font-size: 0.8rem; 
+        }
+
+        .message-content {
+            line-height: 1.4;
+            margin-bottom: 0.75rem;
+            font-size: 0.85rem; 
+        }
+
+        .message-date {
+            font-size: 0.65rem; 
+            color: #64748b;
+        }
+        .dark .message-date {
+            color: #94a3b8;
+        }
+
+        .toggle-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .theme-toggle {
+            position: relative;
+            width: 3rem;
+            height: 1.5rem;
+            border-radius: 1rem;
+            background: #64748b;
             cursor: pointer;
         }
-        .form-group button:hover {
-            background-color: #0d47a1;
+
+        .dark .theme-toggle {
+            background: #6366f1;
         }
+
+        .theme-toggle::after {
+            content: '';
+            position: absolute;
+            left: 0.25rem;
+            top: 0.25rem;
+            width: 1rem;
+            height: 1rem;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.2s ease;
+        }
+
+        .dark .theme-toggle::after {
+            transform: translateX(1.5rem);
+        }
+
         .pagination {
             display: flex;
             justify-content: center;
-            margin-top: 20px;
+            gap: 0.25rem;
+            margin-top: 2rem;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            padding: 0 1rem;
+            flex-wrap: wrap;
         }
+
         .pagination a {
-            padding: 8px 16px;
-            margin: 0 4px;
+            padding: 0.4rem 0.8rem;
+            background: var(--primary);
+            color: white;
             text-decoration: none;
-            background-color: #1a73e8;
-            color: #fff;
-            border-radius: 4px;
+            border-radius: 0.5rem;
+            transition: background-color 0.2s ease;
+            font-size: 0.8rem; /* Smaller font size */
+            min-width: 2rem;
+            text-align: center;
         }
+
         .pagination a:hover {
-            background-color: #0d47a1;
+            background: var(--primary-dark);
         }
-        .pagination .active {
-            background-color: #0d47a1;
+
+        @media (max-width: 768px) {
+            .pagination {
+                gap: 0.2rem;
+            }
+            
+            .pagination a {
+                padding: 0.3rem 0.6rem;
+                font-size: 0.75rem;
+                min-width: 1.8rem;
+            }
         }
+       
+        .pagination a:hover {
+            background: var(--primary-dark);
+        }
+
         .pagination .disabled {
-            background-color: #ccc;
+            background: #cbd5e1;
             pointer-events: none;
         }
-        .dark-mode .pagination a {
-            background-color: #555;
+
+        .dark .pagination .disabled {
+            background: #475569;
         }
-        .dark-mode .pagination a:hover {
-            background-color: #333;
+
+        .pagination .active {
+            background: var(--primary-dark);
         }
-        .dark-mode .pagination .active {
-            background-color: #333;
+
+        /* Desktop styles (>= 1024px) */
+        @media (min-width: 1024px) {
+            .header {
+                padding: 2rem 3rem;
+                margin-bottom: 2rem;
+            }
+        
+            .filters {
+                display: grid;
+                grid-template-columns: 1fr 1fr auto;
+                gap: 2rem;
+                padding: 2rem;
+                margin-bottom: 2rem;
+            }
+        
+            .message {
+                padding: 1.5rem 2rem;
+                margin-bottom: 1.5rem;
+            }
+        
+            .message-sender {
+                font-size: 1rem;
+            }
+        
+            .message-content {
+                font-size: 1rem;
+                line-height: 1.6;
+            }
+        
+            .message-date {
+                font-size: 0.8rem;
+            }
+        
+            .pagination {
+                margin-top: 3rem;
+                gap: 0.5rem;
+            }
+        
+            .pagination a {
+                padding: 0.6rem 1.2rem;
+                font-size: 0.9rem;
+                min-width: 2.5rem;
+            }
         }
-        .dark-mode .pagination .disabled {
-            background-color: #444;
+        
+        /* Tablet styles (768px - 1023px) */
+        @media (min-width: 768px) and (max-width: 1023px) {
+            .container {
+                width: 90%;
+            }
+        
+            .header {
+                padding: 1.5rem 2rem;
+            }
+        
+            .filters {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+                padding: 1.5rem;
+            }
+        
+            .message {
+                padding: 1.3rem 1.8rem;
+            }
+        
+            .message-sender {
+                font-size: 0.9rem;
+            }
+        
+            .message-content {
+                font-size: 0.9rem;
+            }
+        }
+        
+        /* Mobile styles (< 768px) */
+        @media (max-width: 767px) {
+            .container {
+                width: 100%;
+                margin: 1rem auto;
+                padding: 0 0.8rem;
+            }
+        
+            /* Header restructuring for mobile */
+            .header {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+                padding: 1.5rem 1.2rem;
+                margin-bottom: 1rem;
+                gap: 1rem;
+            }
+        
+            .header h1 {
+                font-size: 1.5rem;
+                margin-bottom: 0.5rem;
+                width: 100%;
+                text-align: center;
+            }
+        
+            .toggle-wrapper {
+                width: 100%;
+                justify-content: center;
+                align-items: center;
+                gap: 0.5rem;
+            }
+        
+            .toggle-wrapper span {
+                font-size: 0.9rem;
+            }
+        
+            /* Filters and other elements */
+            .filters {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+                padding: 1rem;
+                margin-bottom: 1rem;
+            }
+        
+            .form-group {
+                gap: 0.3rem;
+            }
+        
+            select, input[type="text"] {
+                padding: 0.6rem;
+                font-size: 0.9rem;
+                width: 100%;
+            }
+        
+            button {
+                padding: 0.6rem 1.2rem;
+                width: 100%;
+            }
+        
+            .message {
+                padding: 1rem;
+                margin-bottom: 0,1rem;
+            }
+        
+            .message-sender {
+                font-size: 0.8rem;
+                margin-bottom: 0.3rem;
+            }
+        
+            .message-content {
+                font-size: 0.85rem;
+                line-height: 1.4;
+                margin-bottom: 0.5rem;
+            }
+        
+            .message-date {
+                font-size: 0.7rem;
+            }
+        
+            .pagination {
+                margin-top: 1.5rem;
+                gap: 0.3rem;
+            }
+        
+            .pagination a {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.75rem;
+                min-width: 2rem;
+            }
         }
     </style>
 </head>
-<body>
+<body class="<?php echo isset($_COOKIE['darkMode']) && $_COOKIE['darkMode'] === 'true' ? 'dark' : ''; ?>">
     <div class="container">
-        <div class="header">
-            <h1>Simple SMS Viewer</h1>
-            <label>
-                Dark Mode
-                <input type="checkbox" id="dark-mode-toggle">
-            </label>
-        </div>
+        <header class="header">
+            <h1>Message Inbox</h1>
+            <div class="toggle-wrapper">
+                <span>Dark/Light Mode</span>
+                <div class="theme-toggle" role="button" tabindex="0"></div>
+            </div>
+        </header>
 
-        <form method="post" action="">
+        <form method="post" action="" class="filters">
             <div class="form-group">
-                <label for="sender">Select Sender:</label>
+                <label for="sender">Select Sender</label>
                 <select id="sender" name="sender">
                     <option value="">All Senders</option>
                     <?php foreach ($uniqueSenders as $sender): ?>
@@ -265,8 +540,8 @@ $currentMessages = array_slice($smsMessages, $offset, $itemsPerPage);
             </div>
 
             <div class="form-group">
-                <label for="search">Search Messages:</label>
-                <input type="text" id="search" name="search" value="<?= htmlspecialchars($searchQuery) ?>" placeholder="Enter keyword">
+                <label for="search">Search Messages</label>
+                <input type="text" id="search" name="search" value="<?= htmlspecialchars($searchQuery) ?>" placeholder="Enter keywords...">
             </div>
 
             <button type="submit">Apply Filters</button>
@@ -275,54 +550,83 @@ $currentMessages = array_slice($smsMessages, $offset, $itemsPerPage);
         <ul class="message-list">
             <?php if (!empty($currentMessages)): ?>
                 <?php foreach ($currentMessages as $sms): ?>
-                    <li class="message-item">
-                        <div class="sender"><?= htmlspecialchars($sms['address']) ?></div>
-                        <div class="message-body"><?= nl2br(htmlspecialchars($sms['body'])) ?></div>
-                        <div class="date"><?= htmlspecialchars($sms['date']) ?></div>
+                    <li class="message">
+                        <div class="message-sender"><?= htmlspecialchars($sms['address']) ?></div>
+                        <div class="message-content"><?= nl2br(htmlspecialchars($sms['body'])) ?></div>
+                        <div class="message-date"><?= htmlspecialchars($sms['date']) ?></div>
                     </li>
                 <?php endforeach; ?>
             <?php else: ?>
-                <li class="message-item">
-                    No messages found.
+                <li class="message">
+                    <div class="message-content">No messages found.</div>
                 </li>
             <?php endif; ?>
         </ul>
 
         <div class="pagination">
+            <?php
+                // Calculate the range of page numbers to display
+                $range = 10;
+                $half_range = floor($range / 2);
+                
+                // Calculate start and end page numbers
+                if ($totalPages <= $range) {
+                    $start_page = 1;
+                    $end_page = $totalPages;
+                } else {
+                    if ($currentPage <= $half_range) {
+                        $start_page = 1;
+                        $end_page = $range;
+                    } elseif ($currentPage > ($totalPages - $half_range)) {
+                        $start_page = $totalPages - $range + 1;
+                        $end_page = $totalPages;
+                    } else {
+                        $start_page = $currentPage - $half_range;
+                        $end_page = $currentPage + $half_range - 1;
+                    }
+                }
+            ?>
             <?php if ($currentPage > 1): ?>
-                <a href="?page=<?= $currentPage - 1 ?>">Previous</a>
+                <a href="?page=<?= $currentPage - 1 ?><?= $selectedSender ? '&sender=' . urlencode($selectedSender) : '' ?><?= $searchQuery ? '&search=' . urlencode($searchQuery) : '' ?>">Previous</a>
             <?php else: ?>
                 <a href="#" class="disabled">Previous</a>
             <?php endif; ?>
-
-            <?php for ($i = 1; $i <= $totalPages; $i++): ?>
-                <a href="?page=<?= $i ?>" class="<?= ($currentPage == $i) ? 'active' : '' ?>"><?= $i ?></a>
+        
+            <?php for ($i = $start_page; $i <= $end_page; $i++): ?>
+                <a href="?page=<?= $i ?><?= $selectedSender ? '&sender=' . urlencode($selectedSender) : '' ?><?= $searchQuery ? '&search=' . urlencode($searchQuery) : '' ?>" 
+                   class="<?= ($currentPage == $i) ? 'active' : '' ?>"><?= $i ?></a>
             <?php endfor; ?>
-
+        
             <?php if ($currentPage < $totalPages): ?>
-                <a href="?page=<?= $currentPage + 1 ?>">Next</a>
+                <a href="?page=<?= $currentPage + 1 ?><?= $selectedSender ? '&sender=' . urlencode($selectedSender) : '' ?><?= $searchQuery ? '&search=' . urlencode($searchQuery) : '' ?>">Next</a>
             <?php else: ?>
                 <a href="#" class="disabled">Next</a>
             <?php endif; ?>
         </div>
-    </div>
 
     <script>
-        // Check for saved dark mode preference
-        const darkModeToggle = document.getElementById('dark-mode-toggle');
-        const isDarkMode = localStorage.getItem('dark-mode') === 'enabled';
-        if (isDarkMode) {
-            document.body.classList.add('dark-mode');
-            darkModeToggle.checked = true;
+        const themeToggle = document.querySelector('.theme-toggle');
+        const body = document.body;
+        
+        // Check saved preference
+        if (localStorage.getItem('darkMode') === 'true') {
+            body.classList.add('dark');
+            document.cookie = 'darkMode=true;path=/';
         }
 
-        // Toggle dark mode
-        darkModeToggle.addEventListener('change', () => {
-            document.body.classList.toggle('dark-mode');
-            if (document.body.classList.contains('dark-mode')) {
-                localStorage.setItem('dark-mode', 'enabled');
-            } else {
-                localStorage.removeItem('dark-mode');
+        themeToggle.addEventListener('click', () => {
+            body.classList.toggle('dark');
+            const isDark = body.classList.contains('dark');
+            localStorage.setItem('darkMode', isDark);
+            document.cookie = `darkMode=${isDark};path=/`;
+        });
+
+        themeToggle.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                body.classList.toggle('dark');
+                const isDark = body.classList.contains('dark');
+                localStorage.setItem('darkMode', isDark);
+                document.cookie = `darkMode=${isDark};path=/`;
             }
         });
     </script>
