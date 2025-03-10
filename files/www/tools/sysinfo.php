@@ -39,6 +39,18 @@ function assessLteSignalQuality($lteValues) {
     $qualityList = [];
     foreach ($lteValues as $lte) {
         $quality = [];
+
+        // Assess RSSI
+        if ($lte['rssi'] >= -75) {
+            $quality['rssi'] = 'Excellent';
+        } elseif ($lte['rssi'] >= -95) {
+            $quality['rssi'] = 'Good';
+        } elseif ($lte['rssi'] >= -110) {
+            $quality['rssi'] = 'Fair';
+        } else {
+            $quality['rssi'] = 'Bad';
+        }
+
         
         // Assess RSRP
         if ($lte['rsrp'] >= -75) {
@@ -74,6 +86,7 @@ function assessLteSignalQuality($lteValues) {
         }
 
         // Calculate overall quality as an average of the individual qualities
+        $rsrpQuality = (($lte['rssi'] + 140) / 96) * 100;
         $rsrpQuality = (($lte['rsrp'] + 140) / 96) * 100;
         $rsrqQuality = (($lte['rsrq'] + 20) / 17) * 100;
         $rssnrQuality = (($lte['rssnr'] + 10) / 40) * 100;
@@ -151,6 +164,9 @@ function checkSignal(){
     
     $sim_operator = shell_exec('getprop gsm.sim.operator.alpha');
     $sims = explode(',', trim($sim_operator));
+
+    $bts_pci = shell_exec('dumpsys telephony.registry | grep -i "mServiceState" | grep -Eo "Pci=[0-9]+" | head -n1 | cut -d= -f2');
+    $pci = explode(',', trim($bts_pci));
     
     $data_type = shell_exec('getprop gsm.network.type');
     $datyp = explode(',', trim($data_type));
@@ -177,6 +193,12 @@ echo "    <i class='fas fa-sim-card'></i>";
 echo "    <h3>Provider SIM " . ($slot + 1) . "</h3>";
 echo "    <p>" . strtoupper($sim_op) . "</p>";
 echo "</div>";
+// Card for Provider PCI
+echo "<div class='card-00'>";
+echo "    <i class='fas fa-sim-card'></i>";
+echo "    <h3>BTS PCI " . ($slot + 1) . "</h3>";
+echo "    <p>" . strtoupper($bts_pci) . "</p>";
+echo "</div>";
 
 // Card for Network Type
 echo "<div class='card-00'>";
@@ -188,6 +210,12 @@ echo '  </div>';
 // Conditional Cards for LTE data
     echo '  <div class="row">';
 if (strtoupper($datyp[$slot]) == 'LTE') {
+    echo "<div class='card-00'>";
+    echo "    <i class='fas fa-signal'></i>";
+    echo "    <h3>LteRSSI</h3>";
+    echo "    <p>" . $lteValues[$i]['rssi'] . " dBm (" . $qualityList[$i]['rssi'] . ")</p>";
+    echo "</div>";
+    
     echo "<div class='card-00'>";
     echo "    <i class='fas fa-signal'></i>";
     echo "    <h3>LteRSRP</h3>";
