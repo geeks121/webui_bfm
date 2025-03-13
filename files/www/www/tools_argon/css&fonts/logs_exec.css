@@ -1,0 +1,329 @@
+:root {
+    --primary-color: #2196F3;
+    --success-color: #4CAF50;
+    --bg-light: #f5f7fa;
+    --text-light: #2c3e50;
+    --card-light: #ffffff;
+    --border-light: #edf2f7;
+    --header-light: #f8fafc;
+    
+    --bg-dark: #1a1b1e;
+    --text-dark: #e4e7eb;
+    --card-dark: #25262b;
+    --border-dark: #2c2e33;
+    --header-dark: #1f2023;
+}
+.svg-spinners--bars-rotate-fade {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    --svg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cg%3E%3Crect width='2' height='5' x='11' y='1' fill='%23000' opacity='0.14'/%3E%3Crect width='2' height='5' x='11' y='1' fill='%23000' opacity='0.29' transform='rotate(30 12 12)'/%3E%3Crect width='2' height='5' x='11' y='1' fill='%23000' opacity='0.43' transform='rotate(60 12 12)'/%3E%3Crect width='2' height='5' x='11' y='1' fill='%23000' opacity='0.57' transform='rotate(90 12 12)'/%3E%3Crect width='2' height='5' x='11' y='1' fill='%23000' opacity='0.71' transform='rotate(120 12 12)'/%3E%3Crect width='2' height='5' x='11' y='1' fill='%23000' opacity='0.86' transform='rotate(150 12 12)'/%3E%3Crect width='2' height='5' x='11' y='1' fill='%23000' transform='rotate(180 12 12)'/%3E%3CanimateTransform attributeName='transform' calcMode='discrete' dur='0.6s' repeatCount='indefinite' type='rotate' values='0 12 12;30 12 12;60 12 12;90 12 12;120 12 12;150 12 12;180 12 12;210 12 12;240 12 12;270 12 12;300 12 12;330 12 12;360 12 12'/%3E%3C/g%3E%3C/svg%3E");
+    background-color: currentColor;
+    -webkit-mask-image: var(--svg);
+    mask-image: var(--svg);
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-size: 100% 100%;
+    mask-size: 100% 100%;
+        }
+* {
+    -webkit-user-select: none; /* Safari */
+    -moz-user-select: none; /* Firefox */
+    -ms-user-select: none; /* Internet Explorer/Edge */
+    user-select: none; /* Standard */
+    -webkit-tap-highlight-color: transparent; /* Hilangkan efek tap di mobile */
+}
+
+/* General styles for light mode (default) */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    background-color: transparent;
+    color: var(--text-light);
+    transition: all 0.3s ease;
+    line-height: 0;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    padding: 0px 0px;
+}
+
+header {
+    padding: 0;
+    text-align: center;
+    position: relative;
+    width: 100%;
+}
+
+.header-top {
+    background-color: transparent;
+    padding: 0px;
+}
+
+.header-bottom {
+    background-color: transparent;
+    padding: 25px;
+}
+
+header h1 {
+    margin: 0;
+    font-size: 0.8em;
+    color: transparent;
+}
+
+.new-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    margin-bottom: 100px;
+    border-radius: 5px;
+    width: calc(100% - 40px);
+    height: calc(100% - 0px);
+    padding: 10px;
+    box-sizing: border-box;
+    background-color: #ffffff;
+    color: #000;
+    text-align: center;
+    z-index: 2;
+}
+
+.new-container p {
+    text-align: left;
+    font-size: 1em;
+    color: #555;
+    margin-top: 14px;
+    margin-left: 10px;
+    font-weight: bold;
+}
+
+.b-container {
+    padding: 19px;
+    width: 100%;
+    margin-bottom: 0px;
+    margin-top: 0px;
+    height: calc(100vh - 50px);
+    display: flex;
+    flex-direction: column;
+    border-radius: 12px;
+}
+
+.container {
+    padding: 10px;
+    width: 100%;
+    margin-bottom: 0px;
+    margin-top: -35px;
+    height: calc(100vh - 50px);
+    display: flex;
+    flex-direction: column;
+    border-radius: 12px;
+}
+
+.logs-card {
+    background-color: var(--card-light);
+    border-radius: 12px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.logs-header {
+    padding: 20px 25px;
+    border-bottom: 1px solid var(--border-light);
+    font-weight: 500;
+    font-size: 0.8rem;
+    color: var(--text-light);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: var(--header-light);
+}
+
+.logs-container {
+    flex: 1;
+    overflow-y: auto;
+    padding: 5px 10px;
+}
+
+.log-entry {
+    padding: 10px 14px;
+    border-radius: 6px;
+    margin-bottom: 5px;
+    background-color: var(--bg-light);
+    font-family: 'Monaco', 'Consolas', monospace;
+    font-size: 10px;
+    line-height: 1.4;
+    white-space: pre-wrap;
+    word-break: break-all;
+}
+
+.logs-container::-webkit-scrollbar {
+    width: 6px;
+}
+
+.logs-container::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.logs-container::-webkit-scrollbar-thumb {
+    background-color: var(--border-light);
+    border-radius: 3px;
+}
+
+.button-container {
+    display: flex;
+    width: 100%;
+    margin-bottom: 20px;
+    background: #fff;
+    padding-top: 60px;  /* Menambah ruang di atas */
+    padding-bottom: 20px;
+    border-radius: 12px;
+    justify-content: center;
+    align-items: center;
+    z-index: 0;
+}
+
+.button-container form {
+    display: flex;
+    width: 90%;
+    margin: 0;
+}
+
+.button-container button {
+    flex: 1; /* Ensures the buttons take equal space */
+    padding: 8px;
+    color: white;
+    border: none;
+    font-size: 0.9rem;
+    font-weight: 520;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.2);
+}
+
+.button-container button:first-child {
+    background-color: #4CAF50;  /* Green for start */
+    border-top-left-radius: 6px;
+    border-bottom-left-radius: 6px;
+}
+
+.button-container button:nth-child(2) {
+    background-color: #FF9800;
+}
+
+.button-container button:last-child {
+    background-color: #F44336;
+    border-top-right-radius: 6px;
+    border-bottom-right-radius: 6px;
+}
+
+.button-container button:hover {
+    opacity: 0.8; /* Slightly change opacity on hover */
+}
+
+/* Dashboard Button - Outline Style */
+.dashboard-button {
+    display: block;
+    width: 90%;
+    padding: 6px;
+    color: var(--primary-color);
+    border: 2px solid var(--primary-color);
+    background-color: transparent;
+    font-size: 0.9rem;
+    cursor: pointer;
+    border-radius: 6px;
+    text-align: center;
+    margin: 0px auto;
+    top: 50px;
+    font-weight: 600;
+    transition: background-color 0.3s, color 0.3s;
+    z-index: 1;
+    position: relative;
+    box-shadow: 2px 2px 2px rgba(0, 0, 255, 0.2);
+}
+
+.dashboard-button:hover {
+    background-color: rgba(33, 150, 243, 0.3);
+    color: white;
+}
+a {
+    text-decoration: none;
+}
+
+.loading-container { 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 10px;
+    background-color: #fff;
+    border-radius: 5px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    position: fixed;
+    top: 40%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 2;
+}
+/* Dark mode styles */
+@media (prefers-color-scheme: dark) {
+    body {
+        background-color: transparent;
+        color: var(--text-dark);
+    }
+
+    .new-container {
+        background-color: #2a2a2a;
+        color: #e0e0e0;
+    }
+    .new-container p {
+    background-color: #2a2a2a; /* Dark background for containers */
+    color: #e0e0e0;
+    }
+
+    .logs-card {
+        background-color: var(--card-dark);
+    }
+
+    .logs-header {
+        border-color: var(--border-dark);
+        color: var(--text-dark);
+        background-color: var(--header-dark);
+    }
+
+    .log-entry {
+        background-color: rgba(0, 0, 0, 0.2);
+    }
+
+    .logs-container::-webkit-scrollbar-thumb {
+        background-color: var(--border-dark);
+    }
+    
+    .button-container {
+        background: #2a2a2a;
+    }
+    
+    .dashboard-button {
+        box-shadow: 2px 2px 2px rgba(0, 0, 255, 0.6);
+    }
+    
+    .button-container button {
+        box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.6);
+    }
+
+    .loading-container {
+        background-color: #333;
+        color: #e0e0e0;
+    }
+}
