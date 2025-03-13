@@ -104,6 +104,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
           </button>
           <div class="dropdown-container">
             <a onclick="loadContent('/tools_argon/opsi_interface.php')">Interface</a>
+            <a onclick="loadContent('/tools/signalpro.php')">Signal Pro</a>
             <a onclick="loadContent('/tools_argon/hotspot.php')">Wireless</a>
             <a onclick="loadContent('/tools_argon/vnstat.php')">Bandwith</a>
             <a onclick="loadContent('/tools/qos.php')">QOS</a>

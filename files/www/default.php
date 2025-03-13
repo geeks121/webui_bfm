@@ -297,6 +297,11 @@ $host = $x[0];
                       </a>
                     </li>
                     <li>
+                      <a href="#" onclick="loadIframe('/tools/signalpro.php')">
+                        <span class="sub-item">signal pro</span>
+                      </a>
+                    </li>
+                    <li>
                       <a href="#" onclick="loadIframe('/tools/ipset.php')">
                         <span class="sub-item">Set Wlan Ip</span>
                       </a>
