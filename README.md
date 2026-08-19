@@ -62,6 +62,9 @@ Once BOX UI is set up and running, access it via the following addresses:
 
 Access BOX settings through the web interface to configure BFR settings, select kernels, and manage Clash or SingBox settings.
 
+### Todo
+- Upgrade to material 3
+- 
 ### SMS Inbox
 
 Read and manage your Android SMS directly from the web UI.
